@@ -2,6 +2,8 @@
 
 **English** · [简体中文](README.zh-CN.md)
 
+[Open the published benchmark page](https://traveller23.github.io/reviewer-model-benchmark/)
+
 This repository builds a bilingual static benchmark page from `statistics.json`. It compares five hosted GPT models and one locally served Bonsai 2 model on four AI review roles at different reasoning effort settings. The page has five bar charts, three scatter plots, and optional Pareto fronts. The results describe this specific workload, not a general model ranking or authorization for production review.
 
 ## What was measured
@@ -95,7 +97,7 @@ On Windows, use `py -m venv .venv`, `.venv\Scripts\python -m pip install plotly=
 
 `build.py` reads `statistics.json` beside itself and writes `charts.html` beside itself. It also accepts input and output paths: `.venv/bin/python build.py path/to/statistics.json path/to/charts.html`. The output directory must contain the matching `resources/` directory. The generated HTML opens directly in a browser without a web server or network; external source links need a network connection.
 
-The footer shows when the page was generated, not when the model runs occurred or when prices were checked.
+The footer's "Updated" date is the page build date, not the model collection or price-check date.
 
 ## Score and metric rules
 

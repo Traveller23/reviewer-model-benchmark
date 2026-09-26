@@ -2,6 +2,8 @@
 
 **[English](README.md)** · 简体中文
 
+[打开已发布的 Benchmark 页面](https://traveller23.github.io/reviewer-model-benchmark/)
+
 本工具读取同目录的 `statistics.json`, 生成可离线打开的 `charts.html`, 用于比较不同模型和推理强度在 4 项 Reviewer 基准中的分数, 平均耗时, 平均 token 用量及等效 API 费用. 页面提供英文和中文切换, 包含 5 张柱状图, 3 张散点图, 以及可按需显示的帕累托前沿.
 
 这个页面是独立的比较视图. 它不会修改输入数据, 也不会替代 benchmark 自身生成的正式分项报告.
@@ -90,7 +92,7 @@ Windows 中可使用 `py -m venv .venv`, `.venv\Scripts\python -m pip install pl
 
 输出页面通过相对路径加载 `resources/`. 若指定其他输出目录, 该目录也必须有对应的 `resources/` 文件夹. 用浏览器直接打开 `charts.html` 即可; 查看图表不需要 Python, 网络或 Web 服务器. 页面底部的外部价格资料链接需要联网才能访问.
 
-更新 benchmark 数据时, 按上述步骤重新复制权威文件, 然后运行 `build.py`. 页脚显示页面生成日期, 不代表数据采集或价格核对日期.
+更新 benchmark 数据时, 按上述步骤重新复制权威文件, 然后运行 `build.py`. 页面页脚的“更新于”是页面构建日期, 不代表数据采集或价格核对日期.
 
 ## 计分和指标
 

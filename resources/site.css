@@ -292,27 +292,6 @@ h2 {
 .method-section .panel > p + p { margin-top: 14px; }
 .source-links { font-size: 15px; gap: 22px; }
 .source-links a { display: inline-flex; align-items: center; gap: 4px; }
-.context-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 13px;
-}
-.context-card,
-.context-source {
-  min-width: 0;
-  padding: 18px 20px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
-}
-.context-card h3,
-.context-source h3 { margin: 0 0 8px; font: 650 20px/1.3 var(--font-display); }
-.context-card p,
-.context-source p { margin: 0; color: #62625d; font-size: 14px; line-height: 1.6; }
-.context-card .sample-note { margin-top: 10px; font-weight: 650; color: #705332; }
-.context-card .source-links,
-.context-source .source-links { margin-top: 12px; gap: 8px 18px; font-size: 13px; }
-.context-source { margin-top: 13px; }
 .icon-external-mark { width: 10px; height: 10px; stroke-width: 2; }
 .page-footer {
   display: flex;
@@ -379,7 +358,6 @@ h2 {
 }
 
 @media (max-width: 600px) {
-  .context-grid { grid-template-columns: 1fr; }
   .summary-strip { width: 100%; }
   .summary-item { min-width: 0; gap: 6px; padding: 10px 9px; }
   .icon-summary-mark { width: 16px; height: 16px; }
