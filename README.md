@@ -1,62 +1,110 @@
-# Reviewer Model Benchmark 页面生成工具
+# Reviewer Model Benchmark
 
-本工具读取同目录的 `statistics.json`, 生成可离线打开的 `charts.html`, 用于比较不同模型和推理强度在 4 项 Reviewer 基准中的分数, 平均耗时, 平均 token 用量及等效 API 费用. 页面提供英文和中文切换, 包含 5 张柱状图, 3 张散点图, 以及可按需显示的帕累托前沿.
+**English** · [简体中文](README.zh-CN.md)
 
-这个页面是独立的比较视图. 它不会修改输入数据, 也不会替代 benchmark 自身生成的正式分项报告.
+This repository builds a bilingual static benchmark page from `statistics.json`. It compares five hosted GPT models and one locally served Bonsai 2 model on four AI review roles at different reasoning effort settings. The page has five bar charts, three scatter plots, and optional Pareto fronts. The results describe this specific workload, not a general model ranking or authorization for production review.
 
-## 文件
+## What was measured
 
-将以下文件和目录放在一起:
+ARW is the software project whose development workflow supplied these tasks. A *Reviewer* is an AI agent assigned one review task in that workflow.
 
-```text
-./
-├── build.py
-├── statistics.json
-├── charts.html
-├── README.md
-└── resources/
-    ├── site.css
-    ├── favicon.svg
-    └── fonts/
-```
+| Role | Task | Score share |
+| --- | --- | ---: |
+| Code Standards | Check code against repository instructions and implementation quality standards. | 20% |
+| Code Spec | Check whether changes implement supplied requirements. | 20% |
+| Commit Audit | Audit a staged commit candidate and required checks. | 25% |
+| Spec Readiness | Check requirements before implementation for completeness and feasibility. | 35% |
 
-`statistics.json` 是输入数据的独立快照. 目前它的权威来源是 `${BENCHMARK_SOURCE_STATISTICS}`; 生成正式页面前, 先将该文件复制到本目录. `charts.html` 和 `resources/favicon.svg` 由 `build.py` 生成. `resources/site.css` 和 `resources/fonts/` 是页面所需的预下载资源. 保留整个 `resources/` 目录, 才能在其他计算机上按预期显示样式和字体. 字体许可和来源见 `resources/fonts/README.md`.
+The first three roles each use one fixed scenario; Spec Readiness uses two. Each of the 28 model and effort configurations ran all five scenarios in three independent repetitions: 420 scenario runs and 336 role repetitions. The current snapshot has 99 role repetitions marked as diagnostic scores. The same visible fixture material and hidden scoring cases were used across models. The full fixtures, reports, and hidden cases are not included here; the snapshot can reproduce the charts but cannot replay model runs.
 
-## 使用
+Five GPT models ran through isolated Codex Reviewer sessions at `low`, `medium`, `high`, `xhigh`, and `max`. Bonsai 2 ran locally at `low`, `medium`, and `xhigh` with thinking enabled in a custom read-only Windows worker. Effort labels are requested provider settings, not equal compute budgets. [Prism ML says Bonsai 2 `low` may behave close to `xhigh`](https://huggingface.co/prism-ml/Ternary-Bonsai-2-27B-gguf), so plotted labels do not prove distinct model behavior. GPT and Bonsai 2 also had different execution environments and scheduling.
 
-生成页面需要 Python 和 Plotly. 本工具已用 Python 3.14.4 与 Plotly 6.9.0 验证. 以下命令在本目录执行:
+## Wall-clock collection time
+
+For the **formal model collection**, the first retained call's start and last retained call's completion give these elapsed windows (Japan time, UTC+09:00):
+
+| Group | Start | End | Wall-clock span |
+| --- | --- | --- | ---: |
+| Hosted GPT, 375 calls | 2026-09-24 22:35:09 | 2026-09-26 11:27:22 | 36 h 52 min 13 s |
+| Local Bonsai 2, 45 calls | 2026-09-25 09:25:15 | 2026-09-26 16:17:41 | 30 h 52 min 26 s |
+| Both groups together | 2026-09-24 22:35:09 | 2026-09-26 16:17:41 | 41 h 42 min 32 s |
+
+The groups overlapped for **26 h 2 min 7 s**. GPT allowed up to three independent calls at once; Bonsai 2 used one local worker, and the two groups could run in parallel. These spans include pauses and recovery between their first and last retained calls. They exclude setup before those calls and scoring, adjudication, or page work after them.
+
+Timing was reconstructed from the 375 final GPT Codex session start/completion timestamps and the Windows worker manifests associated with all 45 final Bonsai 2 calls. The manifests include revisions of the same call; the earliest worker start and latest worker end define the Bonsai 2 window. Those detailed session and manifest logs are private and are not in the published `statistics.json`, which only stores per-scenario durations.
+
+For a **clean repeat**, plan on **about 25 hours** from preparation through one final scoring pass, assuming the fixtures and local runtime are already validated:
+
+| Component | Planning calculation |
+| --- | ---: |
+| GPT calls, 39 h 22 min 57 s summed across instances, divided by three continuously occupied slots | 13 h 7 min 39 s |
+| Bonsai 2 calls, 22 h 6 min 24 s summed across serial instances | 22 h 6 min 24 s |
+| Parallel collection phase, limited by Bonsai 2 | about 22 h 6 min |
+| Preparation allowance | 30 min |
+| One scoring and verification pass | 2 h 15 min |
+| **Total idealized schedule** | **about 24 h 51 min** |
+
+The preparation and scoring allowances are planning assumptions. This estimate assumes immediate reuse of each GPT slot and full overlap between GPT and Bonsai 2. It excludes the repairs, reruns, and interruptions that lengthened this study. It is not an observed duration or a guarantee for a future run.
+
+## Bonsai 2 deployment in this study
+
+Bonsai 2 is [Prism ML's ternary version of Qwen3.8-27B](https://huggingface.co/prism-ml/Ternary-Bonsai-2-27B-gguf). The exact weight file was [Ternary-Bonsai-2-27B-PQ2_0.gguf](https://huggingface.co/prism-ml/Ternary-Bonsai-2-27B-gguf/blob/main/Ternary-Bonsai-2-27B-PQ2_0.gguf), served on the Windows host with [Prism ML's llama.cpp runtime](https://github.com/PrismML-Eng/Bonsai-demo) and CUDA. This was local inference, not Alibaba Cloud API inference.
+
+| Component | Benchmark configuration |
+| --- | --- |
+| Host | Intel Core i9-14900K, about 64 GB RAM, NVIDIA RTX 4070 Ti SUPER with 16 GB VRAM |
+| Model | `Ternary-Bonsai-2-27B-PQ2_0.gguf` |
+| Server | Prism ML llama.cpp `llama-server`, Windows CUDA 12.4; recorded runtime build `prism-b10709-9a9394a` |
+| Context and concurrency | 200,000 tokens, one server slot, one worker at a time |
+| GPU and cache | `-ngl 99`, K and V cache `q8_0` |
+| Batching and CPU | batch 2048, microbatch 256, 16 CPU threads |
+| Reuse | 8 context checkpoints, 2 GiB prompt-cache RAM budget |
+| Requests | thinking enabled; worker forwarded `low`, `medium`, or `xhigh` |
+
+These settings document the recorded deployment, not a performance guarantee. A separate local 150K-token check recorded about 15.04 GiB whole-GPU peak use under this profile; that check used a different workload, so it is not the Reviewer benchmark's measured VRAM use.
+
+## Files and local build
+
+| Path | Purpose |
+| --- | --- |
+| `statistics.json` | Independent schema-v4 snapshot of per-scenario runtime observations and per-repetition scores. |
+| `build.py` | Computes chart metrics and generates HTML. |
+| `charts.html` | Generated local page; excluded from Git because GitHub Pages rebuilds it. |
+| `resources/` | Local CSS, favicon, bundled fonts, and font licenses. |
+| `.github/workflows/pages.yml` | Builds and publishes `index.html` to GitHub Pages. |
+
+The snapshot's authoritative source for the maintainer is `${BENCHMARK_SOURCE_STATISTICS}`. The checked-in copy is deliberately independent of that checkout. Update it by copying the source file into this repository and checking that the bytes match; `build.py` does not silently synchronize data from ARW.
+
+Build with Python and Plotly 6.9.0 (validated with Python 3.14.4):
 
 ```bash
-cp ${BENCHMARK_SOURCE_STATISTICS} ./statistics.json
 python3 -m venv .venv
 .venv/bin/python -m pip install plotly==6.9.0
 .venv/bin/python build.py
 ```
 
-Windows 中可使用 `py -m venv .venv`, `.venv\Scripts\python -m pip install plotly==6.9.0` 和 `.venv\Scripts\python build.py`.
-
-默认读取 `build.py` 同目录的 `statistics.json`, 并覆盖同目录的 `charts.html`. 也可以传入自定义输入和输出路径:
+On the maintainer's Ubuntu 26.04 WSL installation, the system `venv` package is absent. An installed `uv` can create the project environment without a system package change:
 
 ```bash
-.venv/bin/python build.py path/to/statistics.json path/to/charts.html
+uv venv --clear --seed --python python3 .venv
+.venv/bin/python -m pip install plotly==6.9.0
+.venv/bin/python build.py
 ```
 
-输出页面通过相对路径加载 `resources/`. 若指定其他输出目录, 该目录也必须有对应的 `resources/` 文件夹. 用浏览器直接打开 `charts.html` 即可; 查看图表不需要 Python, 网络或 Web 服务器. 页面底部的外部价格资料链接需要联网才能访问.
+On Windows, use `py -m venv .venv`, `.venv\Scripts\python -m pip install plotly==6.9.0`, and `.venv\Scripts\python build.py`.
 
-更新 benchmark 数据时, 按上述步骤重新复制权威文件, 然后运行 `build.py`. 页脚的更新日期是生成页面的日期.
+`build.py` reads `statistics.json` beside itself and writes `charts.html` beside itself. It also accepts input and output paths: `.venv/bin/python build.py path/to/statistics.json path/to/charts.html`. The output directory must contain the matching `resources/` directory. The generated HTML opens directly in a browser without a web server or network; external source links need a network connection.
 
-## 计分和指标
+The footer shows when the page was generated, not when the model runs occurred or when prices were checked.
 
-输入文件应为 `schemaVersion: 4` 的配置数组. 每个配置包含模型, 推理强度, 逐场景 `observations` 和若干 Reviewer 记录. 每项 Reviewer 预期有编号 1, 2, 3 的 3 次重复; 缺少某次重复记录时, 该次分数按不可用处理, 仍可用其他正分重复计算 Reviewer 分数. 本工具只支持 v4, 不读取旧版角色或重复级的耗时及 token 汇总.
+## Score and metric rules
 
-单次重复使用 `repetitions[].score` 原始分数, 范围为 0 到 1. 当 `scoreSource` 为 `diagnostic` 或 `mainAgentCorrectedScoringCopy` 为 `true` 时, 这次正分重复乘以一次 `0.9`; 两种状态同时出现仍只乘以一次 `0.9`.
+The input is a nonempty array of `schemaVersion: 4` configurations. Each configuration has per-scenario `observations` and four role records with up to three numbered repetitions. `build.py` does not read older schemas or role-level runtime summaries.
 
-Reviewer 的分数只对正分重复求平均. 某次重复为 0 分、分数不可用 (`score: null`), 或整条重复记录缺失时, 这次不参与平均; 只要出现其中任一种情况, 就在该 Reviewer 的正分平均值上乘以一次 `0.9`, 出现多次仍只乘一次, 也不影响其他 Reviewer 的平均分. 因此正分重复的状态折扣和 Reviewer 平均分的排除折扣最多各一次, 合计最多两次 `0.9` (`0.81`). 如果没有正分重复, 该 Reviewer 在综合分数中按 0 分计算. 图表把 Reviewer 分数乘以 100 显示.
-
-每个模型与推理强度组合都使用 4 项 Reviewer 的固定权重计算综合分数. 计算公式是:
+Each repetition has a raw score from 0 to 1. A positive repetition marked `diagnostic` or `mainAgentCorrectedScoringCopy: true` is multiplied by 0.9 once, even when both flags are present. A role score averages only positive repetitions. If any repetition is zero, unavailable, or missing, the positive-score average is multiplied by 0.9 once more. Thus there are at most two 0.9 factors. With no positive repetition, the role contributes zero. Missing roles also contribute zero; weights are never redistributed.
 
 ```text
-综合分数 = 100 × (
+Weighted score = 100 × (
     0.20 × Code Standards
   + 0.20 × Code Spec
   + 0.25 × Commit Audit
@@ -64,22 +112,12 @@ Reviewer 的分数只对正分重复求平均. 某次重复为 0 分、分数不
 )
 ```
 
-公式中的各项 Reviewer 分数是 0 到 1 的修正后平均值. 某项 Reviewer 为 0 分, 尚未记录, 或没有有效正分重复时, 该项按 0 分带入固定权重, 并在评分明细中显示 0; 不因缺项重新分配权重.
+Elapsed time and token usage use only positive-score repetitions. A role's recorded values are averaged over its usable repetitions. For Spec Readiness, only the normal `artifact-promotion` scenario supplies chart runtime metrics; the early-return `runtime-migration` scenario remains part of scoring. Configuration-level time and token values are arithmetic means over roles with available data. Missing time and incomplete three-part token records are excluded separately; zero token counts are valid. Missing role metrics omit only the affected bars and roles from that metric's configuration mean.
 
-耗时和 token 只统计 `score` 大于 0 的重复; 诊断评分或 Main Agent 修正过评分副本的正分重复仍纳入. 每项 Reviewer 的每次正分重复, 从 `observations[]` 中找到对应场景, 只读取该场景的 `runtime.durationMs` 以及 `runtime.tokenUsage.input`, `cachedInput`, `output`. Code Standards, Code Spec 与 Commit Audit 取各自的 `default` 场景. Spec Readiness 的一次重复虽包含两个场景, 但只取完整审查的 `artifact-promotion` 场景; 提前返回的 `runtime-migration` 场景不参与耗时或 token 计算, 即内部既不求和也不平均.
+The three token parts are uncached input, cached input, and output. Estimated *equivalent API cost* prices each role's average token use at the static per-million-token rates in `build.py`, then averages available role costs. GPT uses published OpenAI Standard short-context rates. Local Bonsai 2 uses the Alibaba Cloud Beijing `qwen3.8-27b` rate as a comparison proxy. **Bonsai 2 incurred no such API charge.** The estimate is not a bill and excludes local hardware, electricity, cache writes, long-context, and tool charges. Prices were checked on 2026-09-25; refresh them before current cost decisions.
 
-先对每项 Reviewer 有耗时记录的正分重复求耗时的算术平均值; 三类 token 用量则对三类数量都记录完整的正分重复分别求算术平均值. 某个模型与推理强度组合在散点图中的耗时, 是有数据的 Reviewer 平均耗时的算术平均值; 三类 token 也分别取有数据的 Reviewer 对应平均用量的算术平均值.
+Scatter plots compare equivalent cost with score, time with score, and time with equivalent cost. Each optional Pareto front uses only the visible configurations with complete values on that plot. Cost axes can use linear or logarithmic scales. Token detail is a stacked bar of the three token parts.
 
-等效 API 费用先对每项 Reviewer 的三类平均 token 用量, 使用 `build.py` 的 `PRICES` 每百万 token 单价计算费用, 再对有数据的 Reviewer 费用求算术平均值. 它不一定是实际账单. 本地 Bonsai 2 按对应的阿里云北京 API 单价估算.
+## Publishing
 
-某项 Reviewer 没有正分重复时, 它的耗时、token 和费用都不计算. 如果某次正分重复的上述指定场景没有可用耗时, 只忽略这次的耗时, 对其余有耗时记录的正分重复求平均; 只有一次可用耗时都没有, 该 Reviewer 的耗时才不计算. 如果某次正分重复的指定场景没有记全三类 token 数量, 就把这次从三类 token 的平均值中一起排除; 只有一次完整记录都没有, 该 Reviewer 的 token 和费用才不计算. token 数量为 0 是有效记录. 耗时与 token 独立计算, 某次缺少其中一项不影响另一项的平均值. 对应明细图只省略该 Reviewer 缺少数据的指标柱子, 并在图下说明原因; 评分明细仍显示该 Reviewer 的分数, 没有有效正分时显示 0. 模型与推理强度组合的耗时, token 或费用仍对其他有数据的 Reviewer 求平均; 只有四项 Reviewer 的某个运行指标均不可用时, 该组合才不出现在需要该指标的散点图中. 缺少 token 数据不会影响已有分数.
-
-三张散点图分别比较费用与分数, 耗时与分数, 耗时与费用; 每张图的帕累托前沿只针对该图中可见且指标完整的配置计算. 费用与分数, 耗时与费用以及费用明细图均可切换费用轴的线性与对数刻度. token 明细是按 Reviewer 分组的堆叠柱状图, 从下到上依次是未缓存输入, 缓存输入, 输出; 三类 token 使用固定颜色.
-
-## 实现和维护
-
-`build.py` 用 Python 读取 JSON 和计算指标, 用 Plotly 生成图表并把图表脚本嵌入 HTML. 页面文字和图表坐标轴可在英文与中文之间切换; 图表交互在浏览器本地运行. `resources/site.css` 和预下载字体控制页面样式.
-
-模型及推理强度的固定顺序, 4 项 Reviewer 的权重, 模型颜色和 API 单价都定义在 `build.py` 顶部. 价格是 2026-09-25 核对的静态值. 如果供应商调整价格, 需要同时更新 `PRICES`, 页面方法说明中的价格核对日期, 再重新生成页面. 当前估算未包含缓存写入, 长上下文或工具附加费用.
-
-本工具不运行 benchmark, 不读取原 effort 目录, 不自动同步新数据, 也不修改输入 JSON. `statistics.json` 应从可信的 benchmark 结果复制; 生成脚本只依据这份同目录快照工作.
+The Pages workflow builds fresh HTML from the checked-in snapshot, places it at `index.html`, and publishes it with `resources/`, `statistics.json`, and `build.py`. The project site works at a repository subpath because its asset links are relative. Set the repository's Pages source to **GitHub Actions**; GitHub Free requires the repository to be public. The workflow does not configure a custom domain. Font source and license details are in [resources/fonts/README.md](resources/fonts/README.md).

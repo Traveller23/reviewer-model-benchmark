@@ -784,16 +784,31 @@ def page_copy():
             "nav_reviewers": "Reviewer breakdown",
             "nav_reviewer_score": "Scores", "nav_reviewer_time": "Execution time",
             "nav_reviewer_tokens": "Token usage", "nav_reviewer_cost": "Equivalent API cost",
-            "nav_method": "Method & data",
+            "nav_method": "Method & data", "nav_context": "Study setup",
             "eyebrow": "MODEL COMPARISON / BENCHMARK",
             "headline": "Model benchmark using four reviewers",
-            "lead": "We use four reviewers throughout the project development lifecycle to evaluate and score models at different reasoning effort levels, then compare their quality, cost, and execution time.",
+            "lead": "Four AI code and document review tasks compare model configurations on scored findings, execution time and token usage. These are results on this specific workload, not a general model ranking.",
             "stat_models": "MODELS", "stat_configurations": "CONFIGURATIONS", "stat_benchmarks": "REVIEWER BENCHMARKS",
+            "context_kicker": "START HERE", "context_title": "What was measured",
+            "context_work_title": "The review workload",
+            "context_work": "ARW is the software project whose development review workflow supplied these tasks. A Reviewer is an AI agent assigned one review role. Code Standards, Code Spec and Commit Audit each use one fixed scenario; Spec Readiness uses two. Each model configuration ran all five scenarios in three independent repetitions, using the same visible task material and hidden expected issues. The score measures detected and correctly handled cases in these particular fixtures.",
+            "context_models_title": "Models and effort levels",
+            "context_models": "Five GPT models ran through isolated Codex Reviewer sessions at low, medium, high, xhigh and max effort. Prism ML's Bonsai 2 27B ran locally at low, medium and xhigh, giving 28 configurations and 420 scenario runs. Effort labels are provider settings, not a common amount of computation. Prism ML says its low setting may behave close to xhigh; treat those plotted labels as requested settings, not proof of distinct behavior.",
+            "context_scores_title": "How to interpret the scores",
+            "context_scores": "Three repetitions produce each role score. A formal score comes from the normal scoring path; a diagnostic score records a report or delivery that needed the defined fallback scoring path. The chart applies the discounts described below. Missing or zero repetitions can lower a score. This small, fixed workload does not establish statistical significance or authorize a model for production review.",
+            "context_runtime_title": "Local Bonsai 2 setup",
+            "context_runtime": "Bonsai 2 is Prism ML's ternary version of Qwen3.8-27B. This study used the Ternary-Bonsai-2-27B-PQ2_0.gguf weights, served on the Windows host by Prism ML's llama.cpp fork with CUDA. The machine had an Intel Core i9-14900K, 64 GB RAM and an NVIDIA RTX 4070 Ti SUPER with 16 GB VRAM. The balanced profile set a 200,000-token context, one server slot, all GPU layers (-ngl 99), Q8_0 K and V cache, batch 2048, microbatch 256, 16 CPU threads, eight context checkpoints and a 2 GiB prompt-cache RAM budget. Thinking was enabled; the worker forwarded the selected effort. Only one Bonsai worker ran at a time. The GPT configurations used hosted Codex sessions, so their elapsed times also reflect different execution environments and scheduling.",
+            "context_source_title": "Data and reproducibility",
+            "context_source": "The downloadable statistics.json is the frozen schema-v4 observation snapshot used by this page. It includes per-scenario runtime observations and per-repetition role scores, but not the private fixture files, full model reports or hidden scoring cases. The page generator and scoring formulas are in the public repository. You can recompute the charts from the snapshot; the snapshot alone cannot replay the model runs.",
+            "sample_note": "",
+            "statistics_link": "Download observation snapshot", "model_link": "Bonsai 2 model card",
+            "gguf_link": "Exact PQ2_0 weight file",
+            "runtime_link": "Prism ML runtime", "source_link": "Page source",
             "score_kicker": "01 / QUALITY", "score_title": "Weighted score by reasoning effort",
             "score_desc": "Each model forms a group. Its bars show reasoning effort levels, ordered from highest to lowest. A reviewer without a usable score contributes zero to the weighted score.",
             "score_read": "Each group is a model; each bar is a reasoning effort level. Taller bars mean higher scores.",
             "trade_kicker": "02 / TRADE-OFFS", "trade_title": "Quality, time and cost",
-            "trade_intro": "Each dot represents one model and reasoning effort configuration. Connecting lines follow effort levels within the same model. The Pareto Front is off by default. Click Pareto Front in any chart legend to show the best visible points and the line connecting them.",
+            "trade_intro": "Each dot represents one model and reasoning effort configuration. Connecting lines follow effort levels within the same model. The Pareto Front is off by default. Click it in a chart legend to show visible points for which no other visible point is at least as good on both axes and better on one.",
             "cost_score_title": "Equivalent API cost vs. score",
             "cost_score_desc": "Equivalent API cost converts the tokens used for the same workload to USD at published API rates. Locally run models use the corresponding cloud API rate so costs can be compared.",
             "cost_score_read": "Higher is better; farther left is cheaper. The line between dots shows how a model changes across effort levels.",
@@ -824,7 +839,7 @@ def page_copy():
             "method_kicker": "DATA NOTES", "method_title": "How scores and costs are calculated",
             "method_score": "A reviewer score averages only positive-score repetitions. A zero or unavailable score, including a missing repetition record, does not enter the average. If any repetition is excluded this way, multiply the reviewer's positive-score average by 0.9 once, even if several are excluded. A positive repetition score is also multiplied by 0.9 once if it is diagnostic, uses a Main Agent-corrected scoring copy, or both. These are the only two possible 0.9 factors. A reviewer with no positive score, or no reviewer record, contributes zero to the weighted score. All four weights always apply.",
             "method_runtime": "Time and tokens use only repetitions with a positive score. For each repetition, use the time and three token counts recorded for its normal review scenario. If a repetition also has an early-return scenario, do not add or average its time or tokens. Within each reviewer, average recorded time values and complete sets of three token counts separately. The time shown for a model and effort is then the arithmetic mean of reviewers with time data; each token count is averaged separately.",
-            "method_cost": "Equivalent API cost first applies published per-million-token prices to each reviewer's average uncached input, cached input and output tokens, then takes the arithmetic mean of available reviewer costs. GPT uses OpenAI Standard short-context rates; local Bonsai 2 uses the public Alibaba Cloud Beijing qwen3.8-27b API rate. Prices checked 2026-09-25. Cache writes, long context and tool charges are excluded.",
+            "method_cost": "Equivalent API cost first applies published per-million-token prices to each reviewer's average uncached input, cached input and output tokens, then takes the arithmetic mean of available reviewer costs. GPT uses OpenAI Standard short-context rates; local Bonsai 2 uses the Alibaba Cloud Beijing qwen3.8-27b API rate as a comparison proxy. Bonsai 2 did not incur that API charge. This is not actual billing and excludes local hardware, electricity, cache writes, long context and tool charges. Prices checked 2026-09-25.",
             "method_missing": "If a reviewer has no positive-score repetition, its time, tokens and cost cannot be calculated. If a positive-score repetition's normal review scenario has no usable time value, omit only that repetition from the time average; time is unavailable only if none have a usable value. If the normal review scenario lacks any of the three token counts, omit that repetition from all three token averages; tokens and cost are unavailable only if no positive-score repetition has a complete set. A token count of zero is valid. Only that reviewer's affected detail bars are omitted; the model and effort still average the other reviewers with data.",
             "openai_prices": "OpenAI pricing", "luna_prices": "GPT-5.6 Luna pricing", "qwen_prices": "Qwen pricing",
             "footer_name": "Reviewer Model Benchmark",
@@ -840,16 +855,31 @@ def page_copy():
             "nav_reviewers": "Reviewer 分项",
             "nav_reviewer_score": "评分", "nav_reviewer_time": "耗时",
             "nav_reviewer_tokens": "Token 用量", "nav_reviewer_cost": "等效 API 费用",
-            "nav_method": "方法与数据",
+            "nav_method": "方法与数据", "nav_context": "测量背景",
             "eyebrow": "模型比较 / 基准",
             "headline": "基于 Reviewer 的模型 Benchmark",
-            "lead": "我们使用覆盖项目开发生命周期的四个 Reviewer, 验证并评分不同模型和推理强度, 以比较模型的质量, 费用与耗时.",
+            "lead": "用四类代码与文档审查任务, 比较模型配置在识别问题、运行耗时和 token 用量上的表现. 结果只反映这组任务, 不是通用模型排名.",
             "stat_models": "模型", "stat_configurations": "模型配置", "stat_benchmarks": "REVIEWER 基准",
+            "context_kicker": "先看这里", "context_title": "测量了什么",
+            "context_work_title": "审查任务",
+            "context_work": "ARW 是提供这组开发审查任务的软件项目. Reviewer 是在该流程中承担一种审查职责的 AI Agent. Code Standards、Code Spec、Commit Audit 各有一个固定场景, Spec Readiness 有两个. 每个模型配置在相同的可见任务材料和隐藏预期问题下, 独立重复运行三次全部五个场景. 分数衡量模型在这些特定夹具中发现并正确处理问题的情况.",
+            "context_models_title": "模型与推理档位",
+            "context_models": "五个 GPT 模型通过隔离的 Codex Reviewer 会话分别运行 low、medium、high、xhigh、max. Prism ML 的 Bonsai 2 27B 在本机运行 low、medium、xhigh, 因而共有 28 个配置、420 次场景运行. 档位名称是各自服务的设置, 不能视为相同的计算量. Prism ML 提醒 low 可能表现得接近 xhigh; 图中的档位代表实际请求值, 不能证明其行为有明确区分.",
+            "context_scores_title": "如何理解分数",
+            "context_scores": "每项角色分数来自三次重复. 正式分数走常规评分流程; 诊断分数表示报告或交付转入约定的后备评分流程. 图表采用下文说明的折扣, 缺失或零分的重复也会拉低分数. 这组固定的小规模任务不证明统计显著性, 也不授予模型正式审查资格.",
+            "context_runtime_title": "本地 Bonsai 2 部署",
+            "context_runtime": "Bonsai 2 是 Prism ML 基于 Qwen3.8-27B 制作的三值权重版本. 本次使用 Ternary-Bonsai-2-27B-PQ2_0.gguf, 在 Windows 宿主机通过 Prism ML 的 llama.cpp 分支和 CUDA 运行. 机器为 Intel Core i9-14900K、64 GB 内存、NVIDIA RTX 4070 Ti SUPER 16 GB 显存. balanced 启动档使用 200,000 token 上下文、单个服务槽位、GPU 全层 (-ngl 99)、Q8_0 K/V 缓存、batch 2048、microbatch 256、16 CPU 线程、8 个上下文检查点及 2 GiB 提示缓存 RAM 预算. 请求开启思考模式, worker 转发所选推理档位, 同时只运行一个 Bonsai worker. GPT 通过托管的 Codex 会话运行, 因此耗时还受不同运行环境与调度方式影响.",
+            "context_source_title": "数据与复现范围",
+            "context_source": "可下载的 statistics.json 是本页采用的 schema-v4 观测快照, 含逐场景运行记录与逐次角色分数, 但不含私有场景文件、完整模型报告或隐藏评分用例. 页面生成器和计算公式在公开仓库中. 读者可从快照重算图表, 但不能仅靠这份快照重跑模型测量.",
+            "sample_note": "",
+            "statistics_link": "下载观测快照", "model_link": "Bonsai 2 模型说明",
+            "gguf_link": "本次所用 PQ2_0 权重文件",
+            "runtime_link": "Prism ML 运行程序", "source_link": "页面源码",
             "score_kicker": "01 / 质量", "score_title": "按推理强度比较综合分数",
             "score_desc": "每组是一个模型, 柱子按从高到低显示各档推理强度. 没有可用分数的 Reviewer 以 0 分参与综合分数.",
             "score_read": "每组代表一个模型, 每根柱子代表一种推理强度. 柱子越高, 分数越高.",
             "trade_kicker": "02 / 权衡", "trade_title": "质量, 耗时与费用",
-            "trade_intro": "每个点代表一个模型与推理强度组合. 连线连接同一模型的不同推理强度. 帕累托前沿默认关闭. 点击任一散点图图例中的帕累托前沿, 即可显示当前可见配置的最优点及其连线.",
+            "trade_intro": "每个点代表一个模型与推理强度组合, 连线连接同一模型的不同档位. 帕累托前沿默认关闭; 点击图例可显示当前可见的非支配点及其连线: 没有另一个可见点在两项指标上都不差, 且至少一项更好.",
             "cost_score_title": "等效 API 费用与分数",
             "cost_score_desc": "等效 API 费用是把完成同一组任务消耗的 token, 按公开 API 单价换算成美元; 本地运行的模型也按对应云端 API 价格计算, 便于比较.",
             "cost_score_read": "越高表示分数越好, 越靠左表示费用越低. 点之间的连线显示模型随推理强度的变化.",
@@ -880,7 +910,7 @@ def page_copy():
             "method_kicker": "数据说明", "method_title": "分数与费用的计算方法",
             "method_score": "Reviewer 的分数只对正分重复求平均. 某次重复为 0 分、分数不可用, 或整条重复记录缺失时, 这次不参与平均; 只要出现其中任一种情况, 就将该 Reviewer 的正分平均值乘以一次 0.9, 出现多次仍只乘一次. 单次正分重复若属于诊断评分, 使用 Main Agent 修正过的评分副本, 或同时满足两种情况, 都只乘以一次 0.9. 因此最多只有两次 0.9. 某项 Reviewer 没有正分重复, 或缺少整项记录时, 以 0 分参与综合分数; 四项固定权重始终生效.",
             "method_runtime": "耗时和 token 只统计分数大于 0 的重复. 每次重复只取正常审查场景记录的耗时和三类 token 数量; 若同一次重复还有快速退出场景, 不把它的耗时或 token 相加, 也不与它求平均. 每项 Reviewer 分别对有记录的耗时和三类 token 记录完整的重复求平均. 某个模型与推理强度组合在图中的耗时, 再取有数据 Reviewer 的平均耗时的算术平均值, 三类 token 各自同理.",
-            "method_cost": "等效 API 费用先将每项 Reviewer 的平均未缓存输入, 缓存输入及输出 token 按公开的每百万 token 单价换算, 再对有数据的 Reviewer 费用求算术平均. GPT 使用 OpenAI Standard 短上下文价格; 本地 Bonsai 2 使用阿里云北京 qwen3.8-27b 公开 API 价格. 价格核对日期: 2026-09-25. 不含缓存写入, 长上下文和工具附加费用.",
+            "method_cost": "等效 API 费用先将每项 Reviewer 的平均未缓存输入、缓存输入及输出 token 按公开的每百万 token 单价换算, 再对有数据的 Reviewer 费用求算术平均. GPT 使用 OpenAI Standard 短上下文价格; 本地 Bonsai 2 借用阿里云北京 qwen3.8-27b API 价格作比较代理, 实际并未产生这笔 API 费用. 该数字不是账单, 不含本地硬件、电费、缓存写入、长上下文和工具附加费用. 价格核对日期: 2026-09-25.",
             "method_missing": "某项 Reviewer 若没有正分重复, 其耗时、token 和费用都无法计算. 若某次正分重复的正常审查场景没有可用耗时, 只忽略这次的耗时, 用其余有耗时记录的正分重复求平均; 若一次都没有, 该 Reviewer 的耗时才无法计算. 若某次正分重复的正常审查场景缺少三类 token 数量中的任意一种, 就将这次从三类 token 的平均值中一起排除; 只有一次完整记录都没有, 该 Reviewer 的 token 和费用才无法计算. token 数量为 0 是有效记录. 图中只省略该 Reviewer 对应的明细柱, 该模型与推理强度组合仍对其他有数据的 Reviewer 求平均.",
             "openai_prices": "OpenAI 价格", "luna_prices": "GPT-5.6 Luna 价格", "qwen_prices": "Qwen 价格",
             "footer_name": "Reviewer 模型基准",
@@ -897,12 +927,22 @@ def page(items):
         raise ValueError("Expected a nonempty schema-version-4 statistics.json array.")
     grouped, complete = extract(items)
     copy = page_copy()
+    repetitions = [repetition for item in items for role in item["roles"]
+                   for repetition in role["repetitions"]]
+    diagnostic_count = sum(repetition.get("scoreSource") == "diagnostic"
+                           for repetition in repetitions)
+    copy["en"]["sample_note"] = (f"This snapshot has {len(repetitions)} role repetitions; "
+                                   f"{diagnostic_count} have diagnostic scores. See the method notes before "
+                                   "treating small score differences as meaningful.")
+    copy["zh"]["sample_note"] = (f"当前快照有 {len(repetitions)} 次角色重复, 其中 "
+                                   f"{diagnostic_count} 次为诊断评分. 解读较小的分数差异前, "
+                                   "请先看下方方法说明.")
     for language in ("en", "zh"):
         copy[language]["missing_time_note"] = missing_detail_note(grouped, "minutes", language)
         copy[language]["missing_token_note"] = missing_detail_note(grouped, "cost", language)
     today = date.today()
-    copy["en"]["footer_updated"] = f"Updated {today:%b} {today.day}, {today.year}"
-    copy["zh"]["footer_updated"] = f"更新于 {today.year} 年 {today.month} 月 {today.day} 日"
+    copy["en"]["footer_updated"] = f"Page generated {today:%b} {today.day}, {today.year}"
+    copy["zh"]["footer_updated"] = f"页面生成于 {today.year} 年 {today.month} 月 {today.day} 日"
     en = copy["en"]
 
     def phrase(key, tag="span", class_name=""):
@@ -983,6 +1023,7 @@ def page(items):
 </style><link rel="stylesheet" href="resources/fonts/fonts.css"><link rel="stylesheet" href="resources/site.css"></head><body><div class="app-shell">
 <aside class="sidebar"><div class="brand">{icon('brand', 'brand-mark')}{phrase('brand')}</div><div><div class="side-label" data-i18n="nav_label">{en['nav_label']}</div><nav class="side-nav" aria-label="Page sections">
 <a href="#overview" data-i18n="nav_overview" class="active">{en['nav_overview']}</a>
+<a href="#context" data-i18n="nav_context">{en['nav_context']}</a>
 <a href="#score" data-i18n="nav_score">{en['nav_score']}</a>
 <a href="#tradeoffs" data-i18n="nav_tradeoffs">{en['nav_tradeoffs']}</a>
 <a href="#cost-score" class="sub" data-i18n="nav_cost_score">{en['nav_cost_score']}</a>
@@ -997,6 +1038,12 @@ def page(items):
 </aside>
 <main class="content"><div class="topbar">{phrase('topbar_context', 'span', 'topbar-context')}<div class="language-group" id="language-group" role="group" aria-label="Language"><button id="language-en" type="button" aria-pressed="true">English</button><button id="language-zh" type="button" aria-pressed="false">中文</button></div></div>
 <section class="hero" id="overview">{phrase('eyebrow', 'div', 'eyebrow')}{phrase('headline', 'h1')}{phrase('lead', 'p', 'lead')}<div class="summary-strip"><div class="summary-item">{icon('models', 'summary-mark')}<strong>{len({record['model'] for record in grouped})}</strong>{phrase('stat_models')}</div><div class="summary-item">{icon('configurations', 'summary-mark')}<strong>{len(grouped)}</strong>{phrase('stat_configurations')}</div><div class="summary-item">{icon('benchmark', 'summary-mark')}<strong>{len(REVIEWERS)}</strong>{phrase('stat_benchmarks')}</div></div></section>
+<section class="method-section context-section" id="context"><div class="section-heading">{phrase('context_kicker', 'div', 'section-kicker')}{phrase('context_title', 'h2')}</div>
+<div class="context-grid"><article class="context-card">{phrase('context_work_title', 'h3')}{phrase('context_work', 'p')}</article>
+<article class="context-card">{phrase('context_models_title', 'h3')}{phrase('context_models', 'p')}</article>
+<article class="context-card">{phrase('context_scores_title', 'h3')}{phrase('context_scores', 'p')}{phrase('sample_note', 'p', 'sample-note')}</article>
+<article class="context-card">{phrase('context_runtime_title', 'h3')}{phrase('context_runtime', 'p')}<div class="source-links"><a href="https://huggingface.co/prism-ml/Ternary-Bonsai-2-27B-gguf" target="_blank" rel="noopener noreferrer">{phrase('model_link')}{icon('external', 'external-mark')}</a><a href="https://huggingface.co/prism-ml/Ternary-Bonsai-2-27B-gguf/blob/main/Ternary-Bonsai-2-27B-PQ2_0.gguf" target="_blank" rel="noopener noreferrer">{phrase('gguf_link')}{icon('external', 'external-mark')}</a><a href="https://github.com/PrismML-Eng/Bonsai-demo" target="_blank" rel="noopener noreferrer">{phrase('runtime_link')}{icon('external', 'external-mark')}</a></div></article></div>
+<div class="context-source">{phrase('context_source_title', 'h3')}{phrase('context_source', 'p')}<div class="source-links"><a href="statistics.json">{phrase('statistics_link')}</a><a href="build.py">{phrase('source_link')}</a></div></div></section>
 <section class="chart-section" id="score"><div class="section-heading">{phrase('score_kicker', 'div', 'section-kicker')}{phrase('score_title', 'h2')}{phrase('score_desc', 'p')}</div>
 <article class="panel"><div class="bar-tooltip" id="benchmark-bar-tooltip-effort" hidden></div><div class="bar-viewport"><div class="bar-scroll" style="--groups:{len({record['model'] for record in complete})}">{effort_html}</div></div><p class="reading-note"><strong data-i18n="read_label">{en['read_label']}</strong> · {phrase('score_read')}</p></article></section>
 <section class="chart-section" id="tradeoffs"><div class="section-heading">{phrase('trade_kicker', 'div', 'section-kicker')}{phrase('trade_title', 'h2')}{phrase('trade_intro', 'p')}</div>{''.join(scatter_sections)}</section>
