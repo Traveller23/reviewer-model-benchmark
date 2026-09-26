@@ -183,6 +183,11 @@ h2 {
   font-size: 14px;
   line-height: 1.55;
 }
+.section-heading .section-context {
+  margin: 9px 0 0;
+  color: #65645f;
+  font-size: 13px;
+}
 .panel {
   box-sizing: border-box;
   width: 100%;
@@ -256,6 +261,24 @@ h2 {
   max-width: 100%;
   min-width: 0;
 }
+.bar-frame { position: relative; min-width: 0; }
+.bar-axis-overlay {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  background: var(--surface);
+  pointer-events: none;
+}
+.bar-axis-overlay[hidden] { display: none; }
+.bar-axis-overlay svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  max-width: none;
+}
 .bar-viewport { overflow-x: auto; overflow-y: hidden; }
 #score .bar-viewport { overflow-x: clip; }
 #reviewers .bar-scroll > div { margin-inline: 0; }
@@ -280,6 +303,11 @@ h2 {
 .reviewer-card-meta,
 .reviewer-card p { color: #60615e; }
 .reviewer-card-meta strong { color: #51422e; }
+.reviewer-guide-note {
+  margin: 9px 0 0;
+  color: #686761;
+  font-size: 13px;
+}
 
 .method-section .panel {
   padding: 0;
