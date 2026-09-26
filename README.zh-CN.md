@@ -54,29 +54,40 @@ Bonsai 2 是 [Prism ML 基于 Qwen3.8-27B 制作的三值权重模型](https://h
 
 ## 文件
 
-将以下文件和目录放在一起:
+仓库根目录的主要文件和目录如下:
 
 ```text
 ./
 ├── build.py
 ├── statistics.json
-├── charts.html
 ├── README.md
 ├── README.zh-CN.md
+├── .env.example
+├── .github/
+│   └── workflows/
+│       └── pages.yml
 └── resources/
     ├── site.css
     ├── favicon.svg
     └── fonts/
 ```
 
-`statistics.json` 是输入数据的独立快照. 目前它的权威来源是 `${BENCHMARK_SOURCE_STATISTICS}`; 生成正式页面前, 先将该文件复制到本目录. `charts.html` 和 `resources/favicon.svg` 由 `build.py` 生成. `resources/site.css` 和 `resources/fonts/` 是页面所需的预下载资源. 保留整个 `resources/` 目录, 才能在其他计算机上按预期显示样式和字体. 字体许可和来源见 `resources/fonts/README.md`.
+`statistics.json` 是输入数据的独立快照. 维护者更新它时, 先将 `.env.example` 复制为已忽略的 `.env`, 再把可信来源文件的绝对路径填入 `BENCHMARK_SOURCE_STATISTICS`. 构建页面只读取已提交的 `statistics.json`, 不读取 `.env`, 也不会从其他目录自动同步数据. `charts.html` 是 `build.py` 生成的本地文件, 不提交到 Git; `resources/favicon.svg` 也由脚本生成, 但保存在仓库中. `resources/site.css` 和 `resources/fonts/` 是页面所需的预下载资源. 保留整个 `resources/` 目录, 才能在其他计算机上按预期显示样式和字体. 字体许可和来源见 `resources/fonts/README.md`.
+
+在仓库根目录用 Bash 复制并核对新快照:
+
+```bash
+. ./.env
+: "${BENCHMARK_SOURCE_STATISTICS:?请在 .env 设置 BENCHMARK_SOURCE_STATISTICS}"
+cp -- "$BENCHMARK_SOURCE_STATISTICS" statistics.json
+cmp -- "$BENCHMARK_SOURCE_STATISTICS" statistics.json
+```
 
 ## 使用
 
 生成页面需要 Python 和 Plotly. 本工具已用 Python 3.14.4 与 Plotly 6.9.0 验证. 以下命令在本目录执行:
 
 ```bash
-cp ${BENCHMARK_SOURCE_STATISTICS} ./statistics.json
 python3 -m venv .venv
 .venv/bin/python -m pip install plotly==6.9.0
 .venv/bin/python build.py
@@ -92,7 +103,7 @@ Windows 中可使用 `py -m venv .venv`, `.venv\Scripts\python -m pip install pl
 
 输出页面通过相对路径加载 `resources/`. 若指定其他输出目录, 该目录也必须有对应的 `resources/` 文件夹. 用浏览器直接打开 `charts.html` 即可; 查看图表不需要 Python, 网络或 Web 服务器. 页面底部的外部价格资料链接需要联网才能访问.
 
-更新 benchmark 数据时, 按上述步骤重新复制权威文件, 然后运行 `build.py`. 页面页脚的“更新于”是页面构建日期, 不代表数据采集或价格核对日期.
+更新 benchmark 数据时, 按上述步骤从 `.env` 指定的来源复制并核对文件, 然后运行 `build.py`. 页面页脚的“更新于”是页面构建日期, 不代表数据采集或价格核对日期.
 
 ## 计分和指标
 

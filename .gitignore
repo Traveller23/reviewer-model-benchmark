@@ -1,4 +1,5 @@
 /.venv
+/.env
 
 /charts.html
 __pycache__/

@@ -72,10 +72,18 @@ These settings document the recorded deployment, not a performance guarantee. A 
 | `statistics.json` | Independent schema-v4 snapshot of per-scenario runtime observations and per-repetition scores. |
 | `build.py` | Computes chart metrics and generates HTML. |
 | `charts.html` | Generated local page; excluded from Git because GitHub Pages rebuilds it. |
+| `.env.example` | Template for the maintainer's local, ignored `.env` file. |
 | `resources/` | Local CSS, favicon, bundled fonts, and font licenses. |
 | `.github/workflows/pages.yml` | Builds and publishes `index.html` to GitHub Pages. |
 
-The snapshot's authoritative source for the maintainer is `${BENCHMARK_SOURCE_STATISTICS}`. The checked-in copy is deliberately independent of that checkout. Update it by copying the source file into this repository and checking that the bytes match; `build.py` does not silently synchronize data from ARW.
+The checked-in `statistics.json` is an independent snapshot. To refresh it, a maintainer copies `.env.example` to the ignored `.env` file and sets `BENCHMARK_SOURCE_STATISTICS` there to the trusted source file's absolute path. The site build reads only the checked-in snapshot; it does not read `.env` or silently synchronize data from another checkout. To copy and verify a new snapshot from the repository root in Bash:
+
+```bash
+. ./.env
+: "${BENCHMARK_SOURCE_STATISTICS:?Set BENCHMARK_SOURCE_STATISTICS in .env}"
+cp -- "$BENCHMARK_SOURCE_STATISTICS" statistics.json
+cmp -- "$BENCHMARK_SOURCE_STATISTICS" statistics.json
+```
 
 Build with Python and Plotly 6.9.0 (validated with Python 3.14.4):
 
@@ -85,10 +93,10 @@ python3 -m venv .venv
 .venv/bin/python build.py
 ```
 
-On the maintainer's Ubuntu 26.04 WSL installation, the system `venv` package is absent. An installed `uv` can create the project environment without a system package change:
+If Python's `venv` module is unavailable, an installed `uv` can create the project environment:
 
 ```bash
-uv venv --clear --seed --python python3 .venv
+uv venv --seed --python python3 .venv
 .venv/bin/python -m pip install plotly==6.9.0
 .venv/bin/python build.py
 ```
