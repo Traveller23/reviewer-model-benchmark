@@ -4,7 +4,7 @@
 
 [打开已发布的 Benchmark 页面](https://traveller23.github.io/reviewer-model-benchmark/)
 
-本工具读取同目录的 `statistics.json`, 生成可离线打开的 `charts.html`, 用于比较不同模型和推理强度在 4 项 Reviewer 基准中的分数, 平均耗时, 平均 token 用量及等效 API 费用. 页面提供英文和中文切换, 包含 5 张柱状图, 3 张散点图, 以及可按需显示的帕累托前沿.
+本工具读取同目录的 `statistics.json`, 生成可离线打开的 `charts.html`, 用于比较不同模型和推理强度在 4 项 Reviewer 基准中的分数, 平均耗时, 平均 token 用量及等效 API 费用. 页面包含 5 张柱状图, 3 张散点图, 以及可按需显示的帕累托前沿.
 
 这个页面是独立的比较视图. 它不会修改输入数据, 也不会替代 benchmark 自身生成的正式分项报告.
 
