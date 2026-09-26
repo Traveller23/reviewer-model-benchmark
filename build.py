@@ -18,12 +18,26 @@ REVIEWERS = (
     ("commit-audit-reviewer", "Commit Audit", 0.25),
     ("spec-readiness-reviewer", "Spec Readiness", 0.35),
 )
+SCENARIOS = {
+    "code-standards-reviewer": {"default"},
+    "code-spec-reviewer": {"default"},
+    "commit-audit-reviewer": {"default"},
+    "spec-readiness-reviewer": {"runtime-migration", "artifact-promotion"},
+}
+METRIC_SCENARIO = {
+    "code-standards-reviewer": "default",
+    "code-spec-reviewer": "default",
+    "commit-audit-reviewer": "default",
+    "spec-readiness-reviewer": "artifact-promotion",
+}
+TOKEN_KEYS = ("input", "cachedInput", "output")
+TOKEN_COLORS = {"input": "#6388b7", "cachedInput": "#5f9e98", "output": "#b3935e"}
 EFFORTS = {"low": 0, "medium": 1, "high": 2, "xhigh": 3, "max": 4}
 MODEL_ORDER = (
-    "gpt-6-astra", "gpt-6-sol", "gpt-6-luna",
-    "gpt-5.6-sol", "gpt-5.6-luna", "Ternary-Bonsai-2-27B-PQ2_0.gguf",
+    "gpt-6-astra", "gpt-6-sol", "gpt-5.6-sol",
+    "gpt-6-luna", "gpt-5.6-luna", "Ternary-Bonsai-2-27B-PQ2_0.gguf",
 )
-MODEL_COLORS = ("#4c78b8", "#198f76", "#b47627", "#8659b9", "#bb5272", "#2f8fa9")
+MODEL_COLORS = ("#4c78b8", "#198f76", "#8659b9", "#b47627", "#bb5272", "#2f8fa9")
 ROLE_COLORS = ("#6388b7", "#5f9e98", "#b3935e", "#9b7fb5")
 CHART_TEXT = "#5c5e5c"
 CHART_PLOT = "#f8f5ef"
@@ -110,26 +124,66 @@ def finite_number(value):
 
 def adjusted_reviewer_score(role):
     repetitions = role.get("repetitions")
-    if not isinstance(repetitions, list) or len(repetitions) != 3:
+    if not isinstance(repetitions, list):
         return None
     seen = set()
-    total = 0.0
-    diagnostic_count = 0
+    scores = []
+    eligible_repetitions = set()
+    has_excluded = len(repetitions) < 3
     for repetition in repetitions:
         number = repetition.get("repetition")
         source = repetition.get("scoreSource")
         value = repetition.get("score")
+        corrected = repetition.get("mainAgentCorrectedScoringCopy")
         if number not in (1, 2, 3) or number in seen:
             raise ValueError("Reviewer repetitions must have the distinct numbers 1, 2 and 3.")
         if source not in ("formal", "diagnostic", "unavailable"):
             raise ValueError(f"Unknown repetition score source: {source}")
-        if value is not None:
-            if not finite_number(value) or not 0 <= value <= 1 or source == "unavailable":
-                raise ValueError(f"Invalid repetition score: {value}")
-            total += value * (0.9 if source == "diagnostic" else 1.0)
-            diagnostic_count += source == "diagnostic"
+        if not isinstance(corrected, bool):
+            raise ValueError(f"Invalid Main Agent correction marker: {corrected}")
+        if value is not None and (not finite_number(value) or not 0 <= value <= 1
+                                  or source == "unavailable"):
+            raise ValueError(f"Invalid repetition score: {value}")
+        if value is None or value == 0:
+            has_excluded = True
+        else:
+            scores.append(value * (0.9 if source == "diagnostic" or corrected else 1.0))
+            eligible_repetitions.add(number)
         seen.add(number)
-    return total / 3, diagnostic_count
+    if not scores:
+        return None
+    return (sum(scores) / len(scores) * (0.9 if has_excluded else 1.0),
+            eligible_repetitions)
+
+
+def average_role_runtime(reviewer_id, repetitions, observations):
+    if not repetitions:
+        return None, None, 0, 0
+    duration_total = 0
+    duration_count = 0
+    token_totals = {key: 0 for key in TOKEN_KEYS}
+    token_count = 0
+    for number in repetitions:
+        by_scenario = observations.get((reviewer_id, number), {})
+        observation = by_scenario.get(METRIC_SCENARIO[reviewer_id])
+        if observation is None:
+            continue
+        runtime = observation.get("runtime")
+        if not isinstance(runtime, dict):
+            continue
+        duration = runtime.get("durationMs")
+        if finite_number(duration) and duration >= 0:
+            duration_total += duration
+            duration_count += 1
+        usage = runtime.get("tokenUsage")
+        if isinstance(usage, dict) and all(
+                finite_number(usage.get(key)) and usage[key] >= 0 for key in TOKEN_KEYS):
+            for key in TOKEN_KEYS:
+                token_totals[key] += usage[key]
+            token_count += 1
+    return ((duration_total / duration_count if duration_count else None),
+            ({key: total / token_count for key, total in token_totals.items()}
+             if token_count else None), duration_count, token_count)
 
 
 def extract(items):
@@ -146,36 +200,67 @@ def extract(items):
             raise ValueError(f"Duplicate configuration: {model} / {effort}")
         seen.add((model, effort))
         title = label(item)
+        observations = defaultdict(dict)
+        for observation in item.get("observations", []):
+            key = (observation["reviewerId"], observation["repetition"])
+            scenario = observation["scenarioId"]
+            if scenario in observations[key]:
+                raise ValueError(f"Duplicate observation: {title} / {key} / {scenario}")
+            observations[key][scenario] = observation
         roles = {}
+        seen_reviewers = set()
         for role in item.get("roles", []):
             reviewer_id = role["reviewerId"]
-            if reviewer_id in roles:
+            if reviewer_id not in SCENARIOS:
+                raise ValueError(f"Unknown reviewer: {title} / {reviewer_id}")
+            if reviewer_id in seen_reviewers:
                 raise ValueError(f"Duplicate reviewer: {title} / {reviewer_id}")
+            seen_reviewers.add(reviewer_id)
             result = adjusted_reviewer_score(role)
             if result is not None:
-                roles[reviewer_id] = {"raw": role, "score": result[0],
-                                      "diagnosticCount": result[1]}
-        if roles:
-            grouped.append({"model": model, "effort": effort, "label": title, "roles": roles})
-        if not all(key in roles for key, _, _ in REVIEWERS):
-            continue
+                duration_ms, usage, time_count, token_count = average_role_runtime(
+                    reviewer_id, result[1], observations)
+                cost = (sum(usage[key] * rate for key, rate in zip(TOKEN_KEYS, PRICES[model]))
+                        / 1_000_000 if usage is not None else None)
+                token_errors = sorted({
+                    observation.get("runtime", {}).get("tokenUsageError")
+                    for number in result[1]
+                    for observation in [observations.get((reviewer_id, number), {}).get(
+                        METRIC_SCENARIO[reviewer_id])]
+                    if observation is not None
+                    if isinstance(observation.get("runtime"), dict)
+                    if observation["runtime"].get("tokenUsageError")})
+                roles[reviewer_id] = {"score": result[0],
+                                      "hasScore": True,
+                                      "eligibleRepetitions": result[1],
+                                      "minutes": duration_ms / 60_000 if duration_ms is not None else None,
+                                      "timeRepetitionCount": time_count,
+                                      "tokenUsage": usage, "tokenRepetitionCount": token_count,
+                                      "cost": cost,
+                                      "tokenErrors": token_errors}
+        for reviewer_id, _, _ in REVIEWERS:
+            roles.setdefault(reviewer_id, {"score": 0.0, "hasScore": False,
+                                           "eligibleRepetitions": set(),
+                                           "minutes": None, "tokenUsage": None,
+                                           "timeRepetitionCount": 0, "tokenRepetitionCount": 0,
+                                           "cost": None, "tokenErrors": []})
+        grouped.append({"model": model, "effort": effort, "label": title, "roles": roles})
         score = sum(roles[key]["score"] * weight for key, _, weight in REVIEWERS)
-        durations = [roles[key]["raw"].get("durationMs") for key, _, _ in REVIEWERS]
-        duration = (sum(durations) / 3 / 60_000
-                    if all(finite_number(value) and value >= 0 for value in durations) else None)
-        token_totals = [roles[key]["raw"].get("tokenUsage") for key, _, _ in REVIEWERS]
-        has_tokens = all(isinstance(usage, dict) and all(
-            finite_number(usage.get(token)) and usage[token] >= 0
-            for token in ("input", "cachedInput", "output")) for usage in token_totals)
-        cost = None
-        if has_tokens:
-            totals = [sum(usage[token] for usage in token_totals) / 3
-                      for token in ("input", "cachedInput", "output")]
-            cost = sum(count * rate for count, rate in zip(totals, PRICES[model])) / 1_000_000
+        durations = [roles[key]["minutes"] for key, _, _ in REVIEWERS
+                     if roles[key]["minutes"] is not None]
+        usages = [roles[key]["tokenUsage"] for key, _, _ in REVIEWERS
+                  if roles[key]["tokenUsage"] is not None]
+        costs = [roles[key]["cost"] for key, _, _ in REVIEWERS
+                 if roles[key]["cost"] is not None]
+        duration = sum(durations) / len(durations) if durations else None
+        token_usage = ({key: sum(usage[key] for usage in usages) / len(usages)
+                        for key in TOKEN_KEYS} if usages else None)
+        cost = sum(costs) / len(costs) if costs else None
         complete.append({"model": model, "effort": effort, "label": title,
-                         "score": 100 * score, "minutes": duration, "cost": cost,
-                         "diagnosticCount": sum(roles[key]["diagnosticCount"]
-                                                for key, _, _ in REVIEWERS)})
+                         "score": 100 * score, "minutes": duration,
+                         "tokenUsage": token_usage, "cost": cost,
+                         "timeReviewerCount": len(durations),
+                         "tokenReviewerCount": len(usages), "costReviewerCount": len(costs)})
     return grouped, complete
 
 
@@ -184,20 +269,24 @@ METRICS = {
     "minutes": ("Execution time (min)", False, ".1f"),
     "cost": ("Equivalent API cost (USD)", False, ".4f"),
 }
-METRIC_LABELS_ZH = {"score": "分数", "minutes": "耗时 (min)", "cost": "等效费用 (USD)"}
+METRIC_LABELS_ZH = {"score": "分数", "minutes": "耗时 (min)",
+                    "tokens": "Token 数", "cost": "等效费用 (USD)"}
 
 
 def short_value(record, key):
     if key == "cost":
-        return f"${record[key]:.2f}"
+        return f"${record[key]:.4f}"
     if key == "minutes":
         return f"{record[key]:.1f} min"
     return f"{record[key]:.1f}"
 
 
 def hover_summary(record, xkey, ykey):
-    return (f"{record['label']}\n{short_value(record, xkey)} · "
-            f"{short_value(record, ykey)}")
+    summary = (f"{record['label']}\n{short_value(record, xkey)} · "
+               f"{short_value(record, ykey)}")
+    if "cost" in (xkey, ykey) and record["costReviewerCount"] < len(REVIEWERS):
+        summary += f"\nCost: {record['costReviewerCount']}/{len(REVIEWERS)} reviewers"
+    return summary
 
 
 def rgba(color, alpha):
@@ -278,7 +367,7 @@ def chart(complete, xkey, ykey, chart_id):
              tickfont={"family": CHART_DATA_FONT, "size": 11})
     for key, axis in ((xkey, figure.update_xaxes), (ykey, figure.update_yaxes)):
         if key == "cost":
-            axis(tickprefix="$", showtickprefix="all", tickformat=".2f")
+            axis(tickprefix="$", showtickprefix="all", tickformat=".3~g")
         elif key == "minutes":
             axis(ticksuffix=" min", showticksuffix="all", tickformat=".0f")
     # Plotly draws later traces on top. Keep the Pareto line after model traces.
@@ -373,7 +462,7 @@ def chart(complete, xkey, ykey, chart_id):
                        config={"responsive": True, "displaylogo": False, "scrollZoom": True})
 
 
-def bar_tooltip_script(chart_id, details_en, details_zh):
+def bar_tooltip_script(chart_id, details_en, details_zh, by_role=False):
     script = """
     const gd = document.getElementById('{plot_id}');
     const tip = document.getElementById('benchmark-bar-tooltip-CHART_ID');
@@ -392,6 +481,7 @@ def bar_tooltip_script(chart_id, details_en, details_zh):
     gd.on('plotly_afterplot', () => requestAnimationFrame(keepModebarVisible));
     keepModebarVisible();
     const detailsByLanguage = {en: DETAILS_EN, zh: DETAILS_ZH};
+    const byRole = BY_ROLE;
     let lastMouse = null;
     const add = (parent, tag, className, content) => {
       const element = document.createElement(tag);
@@ -412,7 +502,8 @@ def bar_tooltip_script(chart_id, details_en, details_zh):
       if (!tip.hidden) place(event);
     });
     gd.on('plotly_hover', event => {
-      const detail = detailsByLanguage[window.chartLanguage || 'en'][event.points[0]?.x];
+      const group = detailsByLanguage[window.chartLanguage || 'en'][event.points[0]?.x];
+      const detail = byRole ? group?.[event.points[0]?.data?.meta] : group;
       if (!detail) return;
       tip.replaceChildren();
       add(tip, 'strong', 'bar-tip-title', detail.label);
@@ -422,7 +513,7 @@ def bar_tooltip_script(chart_id, details_en, details_zh):
         const dot = add(line, 'span', 'bar-tip-dot', '');
         dot.style.backgroundColor = row.color;
         add(line, 'span', 'bar-tip-name', row.name);
-        add(line, 'strong', 'bar-tip-value', row.value.toFixed(row.digits));
+        add(line, 'strong', 'bar-tip-value', row.display ?? row.value.toFixed(row.digits));
       }
       tip.hidden = false;
       if (lastMouse) place(lastMouse);
@@ -431,8 +522,98 @@ def bar_tooltip_script(chart_id, details_en, details_zh):
     gd.addEventListener('mouseleave', () => { tip.hidden = true; });
     """
     return (script.replace("CHART_ID", chart_id)
+            .replace("BY_ROLE", str(by_role).lower())
             .replace("DETAILS_EN", json.dumps(details_en, ensure_ascii=False))
             .replace("DETAILS_ZH", json.dumps(details_zh, ensure_ascii=False)))
+
+
+def detail_bar_chart(grouped, metric):
+    model_rank = {model: index for index, model in enumerate(MODEL_ORDER)}
+    ordered = sorted(grouped, key=lambda record: (model_rank[record["model"]],
+                                                  -EFFORTS[record["effort"]]))
+    xlabels = [record["label"] for record in ordered]
+    ticktext = [f'<span style="color:{MODEL_PALETTE[record["model"]]}">'
+                f'{record["label"].replace(" / ", "<br>")}</span>' for record in ordered]
+    details = {language: {} for language in ("en", "zh")}
+    for record in ordered:
+        for language in details:
+            role_details = []
+            for key, name, _ in REVIEWERS:
+                role = record["roles"].get(key)
+                if role is None or (role["tokenUsage"] if metric == "tokens"
+                                    else role[metric]) is None:
+                    role_details.append(None)
+                    continue
+                count = len(role["eligibleRepetitions"])
+                is_time = metric == "minutes"
+                used = role["timeRepetitionCount" if is_time else "tokenRepetitionCount"]
+                meta = (f"{name} · {count}/3 positive repetitions · "
+                        f"{used} with {'time' if is_time else 'complete tokens'}"
+                        if language == "en" else
+                        f"{name} · {count}/3 次正分重复 · {used} 次有"
+                        f"{'耗时' if is_time else '完整 token'}")
+                if metric == "tokens":
+                    usage = role["tokenUsage"]
+                    names = (("input", "Non-cached input", "未缓存输入"),
+                             ("cachedInput", "Cached input", "缓存输入"),
+                             ("output", "Output", "输出"))
+                    rows = [{"name": english if language == "en" else chinese,
+                             "color": TOKEN_COLORS[token], "display": f'{usage[token]:,.0f}'}
+                            for token, english, chinese in names]
+                    rows.append({"name": "Total" if language == "en" else "合计",
+                                 "color": CHART_TEXT, "display": f'{sum(usage.values()):,.0f}'})
+                else:
+                    value = role[metric]
+                    display = f"{value:.1f} min" if metric == "minutes" else f"${value:.4f}"
+                    rows = [{"name": "Time" if metric == "minutes" and language == "en"
+                             else "耗时" if metric == "minutes" else
+                             "Equivalent cost" if language == "en" else "等效费用",
+                             "color": ROLE_COLORS[len(role_details)], "display": display}]
+                role_details.append({"label": record["label"], "meta": meta, "rows": rows})
+            details[language][record["label"]] = role_details
+    figure = go.Figure()
+    if metric == "tokens":
+        for token, english in (("input", "Non-cached input"),
+                               ("cachedInput", "Cached input"), ("output", "Output")):
+            for index, (key, _, _) in enumerate(REVIEWERS):
+                values = [record["roles"].get(key, {}).get("tokenUsage") for record in ordered]
+                figure.add_trace(go.Bar(
+                    x=xlabels, y=[usage[token] if usage is not None else None for usage in values],
+                    name=english + LEGEND_GAP, marker_color=TOKEN_COLORS[token],
+                    offsetgroup=str(index), legendgroup=token, showlegend=index == 0,
+                    legendrank=TOKEN_KEYS.index(token) + 1, meta=index, hoverinfo="none"))
+    else:
+        for index, (key, name, _) in enumerate(REVIEWERS):
+            values = [record["roles"].get(key, {}).get(metric) for record in ordered]
+            figure.add_trace(go.Bar(x=xlabels, y=values, name=name + LEGEND_GAP,
+                                    marker_color=ROLE_COLORS[index], meta=index, hoverinfo="none"))
+    figure.update_layout(barmode="stack" if metric == "tokens" else "group", bargap=0.18,
+                         bargroupgap=0.10, template="plotly_white", height=580,
+                         width=max(1200, len(xlabels) * 84),
+                         margin={"l": 75, "r": 25, "t": 95, "b": 90},
+                         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor=CHART_PLOT,
+                         font={"color": CHART_TEXT, "family": CHART_FONT},
+                         legend={"orientation": "h", "y": 1.02, "yanchor": "bottom"},
+                         yaxis_title={"minutes": "Execution time (min)",
+                                      "tokens": "Tokens", "cost": "Equivalent API cost (USD)"}[metric],
+                         dragmode="pan")
+    figure.update_xaxes(categoryorder="array", categoryarray=xlabels,
+                        tickmode="array", tickvals=xlabels, ticktext=ticktext,
+                        tickangle=0, tickfont={"size": 11})
+    figure.update_yaxes(gridcolor=CHART_GRID, zerolinecolor="#c7bbaa",
+                        tickfont={"family": CHART_DATA_FONT, "size": 11})
+    if metric == "tokens":
+        figure.update_yaxes(tickformat="~s")
+    elif metric == "cost":
+        figure.update_yaxes(tickprefix="$", showtickprefix="all", tickformat=".3~g")
+    else:
+        figure.update_yaxes(ticksuffix=" min", showticksuffix="all", tickformat=".0f")
+    chart_id = f"benchmark-bars-{metric}"
+    return pio.to_html(figure, full_html=False, include_plotlyjs=False, div_id=chart_id,
+                       post_script=bar_tooltip_script(metric, details["en"], details["zh"],
+                                                      by_role=True),
+                       config={"responsive": True, "displaylogo": False,
+                               "displayModeBar": "hover", "doubleClick": "reset"})
 
 
 def bars(grouped, complete):
@@ -451,20 +632,20 @@ def bars(grouped, complete):
         title, roles = record["label"], record["roles"]
         for language in ("en", "zh"):
             score_label = (f"{weighted[title]:.1f} · weighted score" if language == "en"
-                           else f"{weighted[title]:.1f} · 综合分数") if title in weighted else (
-                               "Weighted score unavailable" if language == "en" else "综合分数暂不可用")
-            reviewer_label = "reviewers" if language == "en" else "位 Reviewer"
+                           else f"{weighted[title]:.1f} · 综合分数")
+            scored = sum(role["hasScore"] for role in roles.values())
+            reviewer_label = ("reviewers with a positive score" if language == "en"
+                              else "项 Reviewer 有正分重复")
             role_details[language][title] = {
                 "label": title,
-                "meta": f"{score_label} · {len(roles)}/4 {reviewer_label}",
+                "meta": f"{score_label} · {scored}/4 {reviewer_label}",
                 "rows": [{"name": name, "color": ROLE_COLORS[index],
                           "value": 100 * roles[key]["score"], "digits": 1}
-                         for index, (key, name, _) in enumerate(REVIEWERS) if key in roles],
+                         for index, (key, name, _) in enumerate(REVIEWERS)],
             }
     multi = go.Figure()
     for index, (key, name, _) in enumerate(REVIEWERS):
-        values = [100 * record["roles"][key]["score"] if key in record["roles"] else None
-                  for record in grouped]
+        values = [100 * record["roles"][key]["score"] for record in grouped]
         legend_name = name + LEGEND_GAP
         multi.add_trace(go.Bar(x=xlabels, y=values, name=legend_name, marker_color=ROLE_COLORS[index],
                                text=[f"{value:.0f}" if value is not None else "" for value in values],
@@ -547,6 +728,51 @@ def bars(grouped, complete):
                         config=bar_config))
 
 
+def missing_detail_note(grouped, metric, language):
+    missing = []
+    native_codex_tokens_missing = False
+    for record in grouped:
+        for key, name, _ in REVIEWERS:
+            role = record["roles"].get(key)
+            value = None if role is None else role[metric]
+            if value is None:
+                if metric == "cost":
+                    available = sum(item.get("cost") is not None
+                                    for item in record["roles"].values())
+                    suffix = (f"{name}; cost {available}/4 reviewers" if language == "en"
+                              else f"{name}; 费用取 {available}/4 项 Reviewer")
+                else:
+                    suffix = name
+                missing.append(f'{record["label"]} ({suffix})')
+                if role and any("Native Codex per-turn token usage is missing" in error
+                                for error in role["tokenErrors"]):
+                    native_codex_tokens_missing = True
+    if not missing:
+        return ""
+    names = "; ".join(missing)
+    if metric == "minutes":
+        return (f"No time bar for {names}: no positive-score repetition has a usable time value."
+                if language == "en" else
+                f"{names} 没有耗时柱: 没有任何正分重复留下可用耗时记录.")
+    reason = (" The source reports missing native Codex per-turn token usage."
+              if language == "en" else " 来源数据报告缺少原生 Codex 逐轮 token 用量.") if native_codex_tokens_missing else ""
+    return (f"Token usage is unavailable for {names}. Their token and cost bars are omitted."
+            f"{reason} Token and cost values for each model and effort average the available reviewers."
+            if language == "en" else
+            f"{names} 的 token 用量不可用, 因此不显示对应的 token 与费用柱."
+            f"{reason} 该模型与推理强度组合的 token 与费用取有数据的 Reviewer 的平均值.")
+
+
+def cost_scale_control(plot_id, axis):
+    return (f'<div class="cost-scale-control" role="group" data-plot="{plot_id}" '
+            f'data-axis="{axis}" aria-label="Cost axis scale">'
+            '<span data-i18n="cost_scale">Cost scale</span>'
+            '<button type="button" data-scale="linear" data-i18n="scale_linear" '
+            'aria-pressed="true">Linear</button>'
+            '<button type="button" data-scale="log" data-i18n="scale_log" '
+            'aria-pressed="false">Log</button></div>')
+
+
 def page_copy():
     return {
         "en": {
@@ -555,13 +781,16 @@ def page_copy():
             "nav_overview": "Overview", "nav_score": "Weighted score",
             "nav_tradeoffs": "Trade-offs", "nav_cost_score": "Cost vs. score",
             "nav_time_score": "Time vs. score", "nav_time_cost": "Time vs. cost",
-            "nav_reviewers": "Reviewer breakdown", "nav_method": "Method & data",
+            "nav_reviewers": "Reviewer breakdown",
+            "nav_reviewer_score": "Scores", "nav_reviewer_time": "Execution time",
+            "nav_reviewer_tokens": "Token usage", "nav_reviewer_cost": "Equivalent API cost",
+            "nav_method": "Method & data",
             "eyebrow": "MODEL COMPARISON / BENCHMARK",
             "headline": "Model benchmark using four reviewers",
             "lead": "We use four reviewers throughout the project development lifecycle to evaluate and score models at different reasoning effort levels, then compare their quality, cost, and execution time.",
             "stat_models": "MODELS", "stat_configurations": "CONFIGURATIONS", "stat_benchmarks": "REVIEWER BENCHMARKS",
             "score_kicker": "01 / QUALITY", "score_title": "Weighted score by reasoning effort",
-            "score_desc": "Each model forms a group. Its bars show reasoning effort levels with scores from all four reviewers, ordered from highest to lowest.",
+            "score_desc": "Each model forms a group. Its bars show reasoning effort levels, ordered from highest to lowest. A reviewer without a usable score contributes zero to the weighted score.",
             "score_read": "Each group is a model; each bar is a reasoning effort level. Taller bars mean higher scores.",
             "trade_kicker": "02 / TRADE-OFFS", "trade_title": "Quality, time and cost",
             "trade_intro": "Each dot represents one model and reasoning effort configuration. Connecting lines follow effort levels within the same model. The Pareto Front is off by default. Click Pareto Front in any chart legend to show the best visible points and the line connecting them.",
@@ -570,12 +799,20 @@ def page_copy():
             "cost_score_read": "Higher is better; farther left is cheaper. The line between dots shows how a model changes across effort levels.",
             "time_score_title": "Execution time vs. score",
             "time_score_desc": "See the quality gained as a model spends more time on the benchmark workload.",
-            "time_score_read": "Higher is better; farther left is faster. Time is the average of three benchmark rounds.",
+            "time_score_read": "Higher is better; farther left is faster. Time uses only repetitions with a positive score.",
             "time_cost_title": "Execution time vs. equivalent API cost",
             "time_cost_desc": "Inspect the relationship between elapsed time and estimated token cost.",
             "time_cost_read": "Farther left is faster; lower is cheaper. This plot does not encode quality, so use it alongside the score charts.",
+            "cost_scale": "Cost scale", "scale_linear": "Linear", "scale_log": "Log",
             "review_kicker": "03 / BENCHMARK DETAIL", "review_title": "Score by reviewer benchmark",
-            "review_desc": "Each group shows the reviewer scores available for a model and effort configuration. Bar labels are rounded for readability; hover for one decimal place.",
+            "review_desc": "For each model and effort configuration, compare the four reviewers' scores, time, token usage and equivalent API cost.",
+            "detail_score_title": "Reviewer scores",
+            "detail_time_title": "Execution time by reviewer",
+            "detail_token_title": "Token usage by reviewer",
+            "detail_cost_title": "Equivalent API cost by reviewer",
+            "detail_time_read": "Each bar is one reviewer's average time across positive-score repetitions with a recorded time. Where a repetition has two scenarios, only the normal review scenario counts.",
+            "detail_token_read": "Each bar averages positive-score repetitions with all three token counts, stacking non-cached input at the bottom, cached input in the middle and output on top. Only the normal review scenario counts. Hover for exact counts.",
+            "detail_cost_read": "Each bar prices one reviewer's average token usage from complete positive-score repetitions. The cost for that model and effort is the arithmetic mean of available reviewer costs.",
             "reviewer_guide_title": "Reviewer work, difficulty and score share",
             "difficulty_label": "Difficulty", "score_share_label": "Score share",
             "difficulty_moderate": "Moderate", "difficulty_high": "High", "difficulty_highest": "Highest",
@@ -585,7 +822,10 @@ def page_copy():
             "reviewer_readiness": "Before implementation, checks whether governing documents are complete, consistent, feasible and verifiable.",
             "review_read": "The label color identifies the model. Scroll horizontally to compare all configurations.",
             "method_kicker": "DATA NOTES", "method_title": "How scores and costs are calculated",
-            "method_body": "A diagnostic repetition contributes 90% of its score. Each reviewer score is the sum of three adjusted repetition scores divided by three; an unscored repetition contributes zero. Weighted scores require all four reviewers and use their shares above. Equivalent API cost adds uncached input, cached input and output token costs at published per-million-token prices, then divides the three-round total by three. Configurations with missing token totals are omitted from cost charts. GPT uses OpenAI Standard short-context rates; local Bonsai 2 uses the public Alibaba Cloud Beijing qwen3.8-27b API rate. Prices checked 2026-09-25. Cache writes, long context and tool charges are excluded.",
+            "method_score": "A reviewer score averages only positive-score repetitions. A zero or unavailable score, including a missing repetition record, does not enter the average. If any repetition is excluded this way, multiply the reviewer's positive-score average by 0.9 once, even if several are excluded. A positive repetition score is also multiplied by 0.9 once if it is diagnostic, uses a Main Agent-corrected scoring copy, or both. These are the only two possible 0.9 factors. A reviewer with no positive score, or no reviewer record, contributes zero to the weighted score. All four weights always apply.",
+            "method_runtime": "Time and tokens use only repetitions with a positive score. For each repetition, use the time and three token counts recorded for its normal review scenario. If a repetition also has an early-return scenario, do not add or average its time or tokens. Within each reviewer, average recorded time values and complete sets of three token counts separately. The time shown for a model and effort is then the arithmetic mean of reviewers with time data; each token count is averaged separately.",
+            "method_cost": "Equivalent API cost first applies published per-million-token prices to each reviewer's average uncached input, cached input and output tokens, then takes the arithmetic mean of available reviewer costs. GPT uses OpenAI Standard short-context rates; local Bonsai 2 uses the public Alibaba Cloud Beijing qwen3.8-27b API rate. Prices checked 2026-09-25. Cache writes, long context and tool charges are excluded.",
+            "method_missing": "If a reviewer has no positive-score repetition, its time, tokens and cost cannot be calculated. If a positive-score repetition's normal review scenario has no usable time value, omit only that repetition from the time average; time is unavailable only if none have a usable value. If the normal review scenario lacks any of the three token counts, omit that repetition from all three token averages; tokens and cost are unavailable only if no positive-score repetition has a complete set. A token count of zero is valid. Only that reviewer's affected detail bars are omitted; the model and effort still average the other reviewers with data.",
             "openai_prices": "OpenAI pricing", "luna_prices": "GPT-5.6 Luna pricing", "qwen_prices": "Qwen pricing",
             "footer_name": "Reviewer Model Benchmark",
             "footer_copyright": "© 2026 Tranzvision",
@@ -597,13 +837,16 @@ def page_copy():
             "nav_overview": "概览", "nav_score": "综合分数",
             "nav_tradeoffs": "权衡比较", "nav_cost_score": "费用与分数",
             "nav_time_score": "耗时与分数", "nav_time_cost": "耗时与费用",
-            "nav_reviewers": "Reviewer 分项", "nav_method": "方法与数据",
+            "nav_reviewers": "Reviewer 分项",
+            "nav_reviewer_score": "评分", "nav_reviewer_time": "耗时",
+            "nav_reviewer_tokens": "Token 用量", "nav_reviewer_cost": "等效 API 费用",
+            "nav_method": "方法与数据",
             "eyebrow": "模型比较 / 基准",
             "headline": "基于 Reviewer 的模型 Benchmark",
             "lead": "我们使用覆盖项目开发生命周期的四个 Reviewer, 验证并评分不同模型和推理强度, 以比较模型的质量, 费用与耗时.",
             "stat_models": "模型", "stat_configurations": "模型配置", "stat_benchmarks": "REVIEWER 基准",
             "score_kicker": "01 / 质量", "score_title": "按推理强度比较综合分数",
-            "score_desc": "每组是一个模型, 柱子显示已取得全部 4 项 Reviewer 分数的推理强度, 按从高到低排列.",
+            "score_desc": "每组是一个模型, 柱子按从高到低显示各档推理强度. 没有可用分数的 Reviewer 以 0 分参与综合分数.",
             "score_read": "每组代表一个模型, 每根柱子代表一种推理强度. 柱子越高, 分数越高.",
             "trade_kicker": "02 / 权衡", "trade_title": "质量, 耗时与费用",
             "trade_intro": "每个点代表一个模型与推理强度组合. 连线连接同一模型的不同推理强度. 帕累托前沿默认关闭. 点击任一散点图图例中的帕累托前沿, 即可显示当前可见配置的最优点及其连线.",
@@ -612,12 +855,20 @@ def page_copy():
             "cost_score_read": "越高表示分数越好, 越靠左表示费用越低. 点之间的连线显示模型随推理强度的变化.",
             "time_score_title": "耗时与分数",
             "time_score_desc": "查看模型在 benchmark 工作中花费更多时间时, 分数如何变化.",
-            "time_score_read": "越高表示分数越好, 越靠左表示耗时越少. 耗时为 3 轮测量的平均值.",
+            "time_score_read": "越高表示分数越好, 越靠左表示耗时越少. 耗时仅统计分数大于 0 的重复.",
             "time_cost_title": "耗时与等效 API 费用",
             "time_cost_desc": "查看运行耗时与估算 token 费用之间的关系.",
             "time_cost_read": "越靠左表示越快, 越靠下表示越便宜. 此图不表示质量, 需结合分数图阅读.",
+            "cost_scale": "费用坐标", "scale_linear": "线性", "scale_log": "对数",
             "review_kicker": "03 / 基准明细", "review_title": "按 Reviewer 基准项比较分数",
-            "review_desc": "每组显示一个模型配置已取得的各项 Reviewer 分数. 柱面数字四舍五入, 悬停可查看一位小数.",
+            "review_desc": "对每种模型及推理强度配置, 分别比较四项 Reviewer 的分数, 耗时, token 用量与等效 API 费用.",
+            "detail_score_title": "Reviewer 分数",
+            "detail_time_title": "各 Reviewer 的耗时",
+            "detail_token_title": "各 Reviewer 的 token 用量",
+            "detail_cost_title": "各 Reviewer 的等效 API 费用",
+            "detail_time_read": "每根柱子是该 Reviewer 有耗时记录的正分重复的平均耗时. 一次重复若有两个场景, 只统计正常审查场景.",
+            "detail_token_read": "每根柱子只对三类 token 都有记录的正分重复求平均, 从下到上依次叠加未缓存输入, 缓存输入和输出 token. 只统计正常审查场景. 悬停可查看准确数量.",
+            "detail_cost_read": "每根柱子按公开单价换算该 Reviewer 记录完整的正分重复的平均 token 用量. 该模型与推理强度组合的等效费用是有数据的 Reviewer 费用的算术平均值.",
             "reviewer_guide_title": "Reviewer 工作, 难度与评分占比",
             "difficulty_label": "难度", "score_share_label": "评分占比",
             "difficulty_moderate": "中等", "difficulty_high": "较高", "difficulty_highest": "最高",
@@ -627,7 +878,10 @@ def page_copy():
             "reviewer_readiness": "在实施前检查治理文档是否完整, 一致, 可实现且可验证.",
             "review_read": "标签颜色对应模型. 水平滚动可查看全部配置.",
             "method_kicker": "数据说明", "method_title": "分数与费用的计算方法",
-            "method_body": "诊断性质的单次重复按原分数的 90% 计入. 每项 Reviewer 的分数为 3 次修正后分数之和除以 3; 未得分的一次按 0 计, 分母仍为 3. 综合分数仅在 4 项 Reviewer 均有结果时计算, 采用上方列出的权重. 等效 API 费用按公开的每百万 token 单价, 汇总未缓存输入, 缓存输入和输出费用, 再将 3 轮合计除以 3. 缺少 token 合计的配置不进入费用图. GPT 使用 OpenAI Standard 短上下文价格; 本地 Bonsai 2 使用阿里云北京 qwen3.8-27b 公开 API 价格. 价格核对日期: 2026-09-25. 不含缓存写入, 长上下文和工具附加费用.",
+            "method_score": "Reviewer 的分数只对正分重复求平均. 某次重复为 0 分、分数不可用, 或整条重复记录缺失时, 这次不参与平均; 只要出现其中任一种情况, 就将该 Reviewer 的正分平均值乘以一次 0.9, 出现多次仍只乘一次. 单次正分重复若属于诊断评分, 使用 Main Agent 修正过的评分副本, 或同时满足两种情况, 都只乘以一次 0.9. 因此最多只有两次 0.9. 某项 Reviewer 没有正分重复, 或缺少整项记录时, 以 0 分参与综合分数; 四项固定权重始终生效.",
+            "method_runtime": "耗时和 token 只统计分数大于 0 的重复. 每次重复只取正常审查场景记录的耗时和三类 token 数量; 若同一次重复还有快速退出场景, 不把它的耗时或 token 相加, 也不与它求平均. 每项 Reviewer 分别对有记录的耗时和三类 token 记录完整的重复求平均. 某个模型与推理强度组合在图中的耗时, 再取有数据 Reviewer 的平均耗时的算术平均值, 三类 token 各自同理.",
+            "method_cost": "等效 API 费用先将每项 Reviewer 的平均未缓存输入, 缓存输入及输出 token 按公开的每百万 token 单价换算, 再对有数据的 Reviewer 费用求算术平均. GPT 使用 OpenAI Standard 短上下文价格; 本地 Bonsai 2 使用阿里云北京 qwen3.8-27b 公开 API 价格. 价格核对日期: 2026-09-25. 不含缓存写入, 长上下文和工具附加费用.",
+            "method_missing": "某项 Reviewer 若没有正分重复, 其耗时、token 和费用都无法计算. 若某次正分重复的正常审查场景没有可用耗时, 只忽略这次的耗时, 用其余有耗时记录的正分重复求平均; 若一次都没有, 该 Reviewer 的耗时才无法计算. 若某次正分重复的正常审查场景缺少三类 token 数量中的任意一种, 就将这次从三类 token 的平均值中一起排除; 只有一次完整记录都没有, 该 Reviewer 的 token 和费用才无法计算. token 数量为 0 是有效记录. 图中只省略该 Reviewer 对应的明细柱, 该模型与推理强度组合仍对其他有数据的 Reviewer 求平均.",
             "openai_prices": "OpenAI 价格", "luna_prices": "GPT-5.6 Luna 价格", "qwen_prices": "Qwen 价格",
             "footer_name": "Reviewer 模型基准",
             "footer_copyright": "© 2026 Tranzvision",
@@ -638,13 +892,14 @@ def page_copy():
 
 def page(items):
     if not isinstance(items, list) or not items or any(
-            not isinstance(item, dict) or item.get("schemaVersion") != 3
+            not isinstance(item, dict) or item.get("schemaVersion") != 4
             for item in items):
-        raise ValueError("Expected a nonempty schema-version-3 statistics.json array.")
+        raise ValueError("Expected a nonempty schema-version-4 statistics.json array.")
     grouped, complete = extract(items)
-    if not grouped or not complete:
-        raise ValueError("At least one reviewer score and one complete configuration are required.")
     copy = page_copy()
+    for language in ("en", "zh"):
+        copy[language]["missing_time_note"] = missing_detail_note(grouped, "minutes", language)
+        copy[language]["missing_token_note"] = missing_detail_note(grouped, "cost", language)
     today = date.today()
     copy["en"]["footer_updated"] = f"Updated {today:%b} {today.day}, {today.year}"
     copy["zh"]["footer_updated"] = f"更新于 {today.year} 年 {today.month} 月 {today.day} 日"
@@ -659,16 +914,38 @@ def page(items):
                      ("minutes", "cost", "time-cost"))
     scatter_sections = []
     for index, (xkey, ykey, slug) in enumerate(scatter_specs, 1):
+        cost_axis = "x" if xkey == "cost" else "y" if ykey == "cost" else None
+        scale_html = cost_scale_control(f"benchmark-scatter-{index}", cost_axis) if cost_axis else ""
+        missing_note = (phrase("missing_token_note", "p", "metric-missing-note")
+                        if cost_axis and en["missing_token_note"] else "")
         scatter_sections.append(
             f'<article class="panel" id="{slug}">'
-            f'{phrase(slug.replace("-", "_") + "_title", "h3")}'
+            f'<div class="chart-panel-heading">{phrase(slug.replace("-", "_") + "_title", "h3")}'
+            f'{scale_html}</div>'
             f'{phrase(slug.replace("-", "_") + "_desc", "p", "chart-desc")}'
             f'<div class="plot-frame" id="benchmark-frame-{index}">'
             f'<div class="point-tooltip" id="benchmark-tooltip-{index}" hidden></div>'
             f'{chart(complete, xkey, ykey, index)}</div>'
             f'<p class="reading-note"><strong data-i18n="read_label">{en["read_label"]}</strong> · '
-            f'{phrase(slug.replace("-", "_") + "_read")}</p></article>')
+            f'{phrase(slug.replace("-", "_") + "_read")}</p>{missing_note}</article>')
     grouped_html, effort_html = bars(grouped, complete)
+    detail_panels = []
+    for metric in ("minutes", "tokens", "cost"):
+        title = {"minutes": "detail_time_title", "tokens": "detail_token_title",
+                 "cost": "detail_cost_title"}[metric]
+        read = {"minutes": "detail_time_read", "tokens": "detail_token_read",
+                "cost": "detail_cost_read"}[metric]
+        note_key = "missing_time_note" if metric == "minutes" else "missing_token_note"
+        note = phrase(note_key, "p", "metric-missing-note") if en[note_key] else ""
+        scale_html = cost_scale_control("benchmark-bars-cost", "y") if metric == "cost" else ""
+        detail_panels.append(
+            f'<article class="panel" id="review-{metric}">'
+            f'<div class="chart-panel-heading">{phrase(title, "h3")}{scale_html}</div>'
+            f'<div class="bar-tooltip" id="benchmark-bar-tooltip-{metric}" hidden></div>'
+            f'<div class="bar-viewport"><div class="bar-scroll" style="--groups:{len(grouped)}">'
+            f'{detail_bar_chart(grouped, metric)}</div></div>'
+            f'<p class="reading-note"><strong data-i18n="read_label">{en["read_label"]}</strong> · '
+            f'{phrase(read)}</p>{note}</article>')
     reviewer_guide = []
     guide_keys = ("reviewer_standards", "reviewer_spec", "reviewer_audit", "reviewer_readiness")
     guide_icons = ("standards", "spec", "audit", "readiness")
@@ -712,6 +989,10 @@ def page(items):
 <a href="#time-score" class="sub" data-i18n="nav_time_score">{en['nav_time_score']}</a>
 <a href="#time-cost" class="sub" data-i18n="nav_time_cost">{en['nav_time_cost']}</a>
 <a href="#reviewers" data-i18n="nav_reviewers">{en['nav_reviewers']}</a>
+<a href="#review-score" class="sub" data-i18n="nav_reviewer_score">{en['nav_reviewer_score']}</a>
+<a href="#review-minutes" class="sub" data-i18n="nav_reviewer_time">{en['nav_reviewer_time']}</a>
+<a href="#review-tokens" class="sub" data-i18n="nav_reviewer_tokens">{en['nav_reviewer_tokens']}</a>
+<a href="#review-cost" class="sub" data-i18n="nav_reviewer_cost">{en['nav_reviewer_cost']}</a>
 <a href="#method" data-i18n="nav_method">{en['nav_method']}</a></nav></div>
 </aside>
 <main class="content"><div class="topbar">{phrase('topbar_context', 'span', 'topbar-context')}<div class="language-group" id="language-group" role="group" aria-label="Language"><button id="language-en" type="button" aria-pressed="true">English</button><button id="language-zh" type="button" aria-pressed="false">中文</button></div></div>
@@ -721,14 +1002,14 @@ def page(items):
 <section class="chart-section" id="tradeoffs"><div class="section-heading">{phrase('trade_kicker', 'div', 'section-kicker')}{phrase('trade_title', 'h2')}{phrase('trade_intro', 'p')}</div>{''.join(scatter_sections)}</section>
 <section class="chart-section" id="reviewers"><div class="section-heading">{phrase('review_kicker', 'div', 'section-kicker')}{phrase('review_title', 'h2')}{phrase('review_desc', 'p')}</div>
 <div class="reviewer-guide">{phrase('reviewer_guide_title', 'h3', 'reviewer-guide-heading')}<div class="reviewer-grid">{''.join(reviewer_guide)}</div></div>
-<article class="panel"><div class="bar-tooltip" id="benchmark-bar-tooltip-grouped" hidden></div><div class="bar-viewport"><div class="bar-scroll" style="--groups:{len(grouped)}">{grouped_html}</div></div><p class="reading-note"><strong data-i18n="read_label">{en['read_label']}</strong> · {phrase('review_read')}</p></article></section>
-<section class="method-section" id="method"><div class="section-heading">{phrase('method_kicker', 'div', 'section-kicker')}{phrase('method_title', 'h2')}</div><div class="panel">{phrase('method_body', 'p')}<div class="source-links"><a href="https://developers.openai.com/api/docs/pricing" target="_blank" rel="noopener noreferrer">{phrase('openai_prices')}{icon('external', 'external-mark')}</a><a href="https://developers.openai.com/api/docs/models/gpt-5.6-luna" target="_blank" rel="noopener noreferrer">{phrase('luna_prices')}{icon('external', 'external-mark')}</a><a href="https://www.alibabacloud.com/help/en/model-studio/qwen3-8-27b" target="_blank" rel="noopener noreferrer">{phrase('qwen_prices')}{icon('external', 'external-mark')}</a></div></div></section>
+<article class="panel" id="review-score"><div class="chart-panel-heading">{phrase('detail_score_title', 'h3')}</div><div class="bar-tooltip" id="benchmark-bar-tooltip-grouped" hidden></div><div class="bar-viewport"><div class="bar-scroll" style="--groups:{len(grouped)}">{grouped_html}</div></div><p class="reading-note"><strong data-i18n="read_label">{en['read_label']}</strong> · {phrase('review_read')}</p></article>{''.join(detail_panels)}</section>
+<section class="method-section" id="method"><div class="section-heading">{phrase('method_kicker', 'div', 'section-kicker')}{phrase('method_title', 'h2')}</div><div class="panel">{phrase('method_score', 'p')}{phrase('method_runtime', 'p')}{phrase('method_cost', 'p')}{phrase('method_missing', 'p')}<div class="source-links"><a href="https://developers.openai.com/api/docs/pricing" target="_blank" rel="noopener noreferrer">{phrase('openai_prices')}{icon('external', 'external-mark')}</a><a href="https://developers.openai.com/api/docs/models/gpt-5.6-luna" target="_blank" rel="noopener noreferrer">{phrase('luna_prices')}{icon('external', 'external-mark')}</a><a href="https://www.alibabacloud.com/help/en/model-studio/qwen3-8-27b" target="_blank" rel="noopener noreferrer">{phrase('qwen_prices')}{icon('external', 'external-mark')}</a></div></div></section>
 </main></div><footer class="page-footer"><div class="footer-brand">{phrase('footer_name', 'span', 'footer-name')}{phrase('footer_copyright', 'span', 'footer-copyright')}</div>{phrase('footer_updated', 'span', 'footer-updated')}</footer><script>
 const translations = {i18n_json};
 window.chartLanguage = 'en';
-const metricTitles = {{en:{{score:'Score',minutes:'Execution time (min)',cost:'Equivalent API cost (USD)'}},zh:{json.dumps(METRIC_LABELS_ZH, ensure_ascii=False)}}};
+const metricTitles = {{en:{{score:'Score',minutes:'Execution time (min)',tokens:'Tokens',cost:'Equivalent API cost (USD)'}},zh:{json.dumps(METRIC_LABELS_ZH, ensure_ascii=False)}}};
 const scatterAxes = [['cost','score'],['minutes','score'],['minutes','cost']];
-const chartIds = ['benchmark-bars-effort','benchmark-scatter-1','benchmark-scatter-2','benchmark-scatter-3','benchmark-bars-grouped'];
+const chartIds = ['benchmark-bars-effort','benchmark-scatter-1','benchmark-scatter-2','benchmark-scatter-3','benchmark-bars-grouped','benchmark-bars-minutes','benchmark-bars-tokens','benchmark-bars-cost'];
 function setLanguage(language) {{
   window.chartLanguage = language;
   document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
@@ -744,18 +1025,70 @@ function setLanguage(language) {{
     Plotly.restyle(gd, {{name:[(language === 'en' ? 'Pareto Front' : '帕累托前沿') + {json.dumps(LEGEND_GAP)}]}}, [gd.data.length - 2]);
   }});
   for (const id of ['benchmark-bars-effort','benchmark-bars-grouped']) Plotly.relayout(document.getElementById(id), {{'yaxis.title.text':metricTitles[language].score}});
+  for (const [id,key] of [['benchmark-bars-minutes','minutes'],['benchmark-bars-tokens','tokens'],['benchmark-bars-cost','cost']])
+    Plotly.relayout(document.getElementById(id), {{'yaxis.title.text':metricTitles[language][key]}});
+  const tokenChart = document.getElementById('benchmark-bars-tokens');
+  const tokenNames = language === 'en' ? ['Non-cached input','Cached input','Output'] : ['未缓存输入','缓存输入','输出'];
+  Plotly.restyle(tokenChart, {{name:tokenNames.flatMap(name => Array(4).fill(name + {json.dumps(LEGEND_GAP)}))}});
+  for (const control of document.querySelectorAll('.cost-scale-control'))
+    control.setAttribute('aria-label', language === 'en' ? 'Cost axis scale' : '费用坐标尺度');
   requestAnimationFrame(() => chartIds.forEach(id => Plotly.Plots.resize(document.getElementById(id))));
 }}
 document.getElementById('language-en').addEventListener('click', () => {{ if (window.chartLanguage !== 'en') setLanguage('en'); }});
 document.getElementById('language-zh').addEventListener('click', () => {{ if (window.chartLanguage !== 'zh') setLanguage('zh'); }});
+for (const control of document.querySelectorAll('.cost-scale-control')) {{
+  control.addEventListener('click', event => {{
+    const button = event.target.closest('button[data-scale]');
+    if (!button || button.getAttribute('aria-pressed') === 'true') return;
+    const axis = control.dataset.axis + 'axis';
+    const chart = document.getElementById(control.dataset.plot);
+    Plotly.relayout(chart, {{[axis + '.type']:button.dataset.scale, [axis + '.autorange']:true}});
+    for (const candidate of control.querySelectorAll('button[data-scale]'))
+      candidate.setAttribute('aria-pressed', String(candidate === button));
+  }});
+}}
 const navLinks = [...document.querySelectorAll('.side-nav a')];
 const sections = navLinks.map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
-const observer = new IntersectionObserver(entries => {{
-  const visible = entries.filter(entry => entry.isIntersecting).sort((a,b) => a.boundingClientRect.top-b.boundingClientRect.top);
-  if (!visible.length) return;
-  navLinks.forEach(link => link.classList.toggle('active', link.getAttribute('href') === '#' + visible[0].target.id));
-}}, {{rootMargin:'-10% 0px -70% 0px'}});
-sections.forEach(section => observer.observe(section));
+let clickedNavLink = null;
+let navUpdatePending = false;
+const activateNavLink = selected =>
+  navLinks.forEach(link => link.classList.toggle('active', link === selected));
+const updateNavFromScroll = () => {{
+  if (clickedNavLink) return;
+  const marker = window.innerHeight * .2;
+  let current = sections[0];
+  for (const section of sections) {{
+    const bounds = section.getBoundingClientRect();
+    if (bounds.top <= marker && bounds.bottom > marker) current = section;
+    else if (bounds.top <= marker && current?.getBoundingClientRect().bottom <= marker)
+      current = section;
+  }}
+  activateNavLink(navLinks.find(link => link.getAttribute('href') === '#' + current?.id));
+}};
+const requestNavUpdate = () => {{
+  if (clickedNavLink || navUpdatePending) return;
+  navUpdatePending = true;
+  requestAnimationFrame(() => {{ navUpdatePending = false; updateNavFromScroll(); }});
+}};
+const releaseNavClick = () => {{ clickedNavLink = null; requestNavUpdate(); }};
+for (const link of navLinks) link.addEventListener('click', () => {{
+  clickedNavLink = link;
+  activateNavLink(link);
+}});
+window.addEventListener('wheel', event => {{
+  if (!event.target.closest('.sidebar')) releaseNavClick();
+}}, {{passive:true}});
+window.addEventListener('touchstart', event => {{
+  if (!event.target.closest('.sidebar')) releaseNavClick();
+}}, {{passive:true}});
+window.addEventListener('keydown', event => {{
+  if (['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '].includes(event.key))
+    releaseNavClick();
+}});
+document.addEventListener('pointerdown', event => {{
+  if (!event.target.closest('.side-nav')) releaseNavClick();
+}});
+window.addEventListener('scroll', requestNavUpdate, {{passive:true}});
 document.fonts.ready.then(() => requestAnimationFrame(() =>
   chartIds.forEach(id => Plotly.Plots.resize(document.getElementById(id)))));
 </script></body></html>"""
