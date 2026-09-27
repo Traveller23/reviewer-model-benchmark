@@ -2,7 +2,7 @@
 
 **[English](README.md)** · 简体中文
 
-[打开已发布的 Benchmark 页面](https://reviewer-model-benchmark.pages.dev/reviewer-model-benchmark/)
+[打开已发布的 Benchmark 页面](https://cybersoul.net/reviewer-model-benchmark/)
 
 本工具读取同目录的 `statistics.json`, 生成可离线打开的 `charts.html`, 用于比较不同模型和推理强度在 4 项 Reviewer 基准中的分数, 平均耗时, 平均 token 用量及等效 API 费用. 页面包含 5 张柱状图, 3 张散点图, 以及可按需显示的帕累托前沿.
 

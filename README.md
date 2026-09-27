@@ -2,7 +2,7 @@
 
 **English** · [简体中文](README.zh-CN.md)
 
-[Open the published benchmark page](https://reviewer-model-benchmark.pages.dev/reviewer-model-benchmark/)
+[Open the published benchmark page](https://cybersoul.net/reviewer-model-benchmark/)
 
 This repository builds a static benchmark page from `statistics.json`. It compares five hosted GPT models and one locally served Bonsai 2 model on four AI review roles at different reasoning effort settings. The page has five bar charts, three scatter plots, and optional Pareto fronts. The results describe this specific workload, not a general model ranking or authorization for production review.
 
