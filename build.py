@@ -611,10 +611,10 @@ def detail_bar_chart(grouped, metric):
                 count = len(role["eligibleRepetitions"])
                 is_time = metric == "minutes"
                 used = role["timeRepetitionCount" if is_time else "tokenRepetitionCount"]
-                meta = (f"{name} · {count}/3 positive repetitions · "
+                meta = (f"{name}\n{count}/3 positive repetitions\n"
                         f"{used} with {'time' if is_time else 'complete tokens'}"
                         if language == "en" else
-                        f"{name} · {count}/3 次正分重复 · {used} 次有"
+                        f"{name}\n{count}/3 次正分重复\n{used} 次有"
                         f"{'耗时' if is_time else '完整 token'}")
                 if metric == "tokens":
                     usage = role["tokenUsage"]
@@ -702,7 +702,7 @@ def bars(grouped, complete):
                               else "项 Reviewer 有正分重复")
             role_details[language][title] = {
                 "label": title,
-                "meta": f"{score_label} · {scored}/4 {reviewer_label}",
+                "meta": f"{score_label}\n{scored}/4 {reviewer_label}",
                 "rows": [{"name": name, "color": ROLE_COLORS[index],
                           "value": 100 * roles[key]["score"], "digits": 1}
                          for index, (key, name, _) in enumerate(REVIEWERS)],
@@ -1045,7 +1045,7 @@ def page(items):
 .chart-section,.method-section {{margin:0 0 46px;scroll-margin-top:24px}} .section-heading {{padding:0 2px 17px}} h2 {{font:720 27px/1.25 var(--font-display);margin:6px 0 8px;letter-spacing:-.02em}} .section-heading p {{margin:0;color:#5f7188;font-size:14px;line-height:1.55}} .panel {{border:1px solid #dce4ee;background:#fff;border-radius:12px;margin:0 0 20px;padding:20px 18px 14px;overflow:hidden;scroll-margin-top:24px;box-shadow:0 10px 30px #283b540d;color:#24364d}} h3 {{font:700 20px/1.3 var(--font-display);margin:0 0 5px}} .chart-desc {{color:#64758b;font-size:14px;margin:0 0 8px}} .reading-note {{border-top:1px solid #e4eaf1;margin:2px 0 0;padding:11px 3px 1px;color:#61738a;font-size:13px;line-height:1.5}} .reading-note strong {{color:#2d517d}}
 .plot-frame {{position:relative}} .point-tooltip {{position:absolute;z-index:20;max-width:220px;width:max-content;white-space:pre-line;transform:translate(-50%,-100%);pointer-events:none;padding:6px 9px;border:1px solid #9eb0c6;border-radius:7px;background:rgba(255,255,255,.86);color:#18304e;font:12px/1.35 var(--font-data);box-shadow:0 4px 14px #24364b30}}
 .point-tooltip[hidden],.bar-tooltip[hidden] {{display:none}} .bar-tooltip {{position:fixed;z-index:100;min-width:210px;max-width:270px;pointer-events:none;padding:10px 12px;border:1px solid #c8c5bd;border-radius:8px;background:rgba(242,240,233,.94);color:#202833;font:12px/1.4 var(--font-body);box-shadow:0 6px 22px #0007}}
-.bar-tip-title {{display:block;font-size:13px;margin-bottom:3px}} .bar-tip-meta {{color:#5b6570;border-bottom:1px solid #cdd0d2;padding-bottom:5px;margin-bottom:5px}} .bar-tip-row {{display:flex;align-items:center;gap:6px;padding:2px 0}} .bar-tip-dot {{width:9px;height:9px;border-radius:50%;flex:none}} .bar-tip-name {{flex:1}} .bar-tip-value {{margin-left:8px;font-family:var(--font-data)}}
+.bar-tip-title {{display:block;font-size:13px;margin-bottom:3px}} .bar-tip-meta {{color:#5b6570;border-bottom:1px solid #cdd0d2;padding-bottom:5px;margin-bottom:5px;white-space:pre-line}} .bar-tip-row {{display:flex;align-items:center;gap:6px;padding:2px 0}} .bar-tip-dot {{width:9px;height:9px;border-radius:50%;flex:none}} .bar-tip-name {{flex:1}} .bar-tip-value {{margin-left:8px;font-family:var(--font-data)}}
 .js-plotly-plot .scatterlayer .trace .js-line {{transition:stroke-opacity .28s ease,stroke-width .28s ease}} .js-plotly-plot .scatterlayer .trace .point {{transition:opacity .28s ease,stroke .28s ease,stroke-width .28s ease}}
 .js-plotly-plot .modebar {{background:transparent!important}} .js-plotly-plot .modebar-group {{background-color:transparent!important}} .js-plotly-plot .modebar-btn path {{fill:#64758b!important}} .js-plotly-plot .modebar-btn:hover path,.js-plotly-plot .modebar-btn.active path {{fill:#2f659c!important}}
 .bar-scroll {{min-width:max(100%,calc(var(--groups) * 84px))}} .bar-scroll > div {{margin-inline:auto}} .bar-viewport {{overflow-x:auto}} #score .bar-viewport {{overflow-x:clip}} #score .bar-scroll {{min-width:0;width:100%}} .method-section .panel {{padding:22px 24px;background:#fff;border-color:#dfe6ee;color:#26364b;box-shadow:0 4px 20px #25354a0b}} .method-section p {{color:#52657d;font-size:13px;line-height:1.7}} .source-links {{display:flex;flex-wrap:wrap;gap:16px;font-size:12px}}
