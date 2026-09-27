@@ -282,7 +282,7 @@ def short_value(record, key):
 
 
 def hover_summary(record, xkey, ykey):
-    summary = (f"{record['label']}\n{short_value(record, xkey)} · "
+    summary = (f"{record['label']}\n{short_value(record, xkey)}\n"
                f"{short_value(record, ykey)}")
     if "cost" in (xkey, ykey) and record["costReviewerCount"] < len(REVIEWERS):
         summary += f"\nCost: {record['costReviewerCount']}/{len(REVIEWERS)} reviewers"
@@ -427,8 +427,38 @@ def chart(complete, xkey, ykey, chart_id):
       const {points} = event;
       const point = points.find(p => p.curveNumber < modelCount);
       if (!point) return;
-      tip.textContent = point.data.customdata[point.pointNumber];
+      const [label, firstValue, secondValue, ...notes] = point.data.customdata[point.pointNumber]
+        .split(String.fromCharCode(10));
+      const title = document.createElement('div');
+      title.className = 'point-tip-title';
+      title.textContent = label;
+      const data = document.createElement('div');
+      data.className = 'point-tip-values';
+      const metrics = document.createElement('div');
+      metrics.className = 'point-tip-metrics';
+      for (const value of [firstValue, secondValue]) {
+        const cell = document.createElement('span');
+        cell.className = 'point-tip-metric';
+        cell.textContent = value;
+        metrics.appendChild(cell);
+      }
+      data.appendChild(metrics);
+      if (notes.length) {
+        const note = document.createElement('div');
+        note.className = 'point-tip-note';
+        note.textContent = notes.join(String.fromCharCode(10));
+        data.appendChild(note);
+      }
+      tip.replaceChildren(title, data);
+      tip.style.width = '';
       tip.hidden = false;
+      const textWidth = element => {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        return range.getBoundingClientRect().width;
+      };
+      const cellWidth = Math.max(...[...metrics.children].map(textWidth)) + 9;
+      tip.style.width = Math.ceil(Math.max(textWidth(title), cellWidth * 2) + 20) + 'px';
       const frameBox = frame.getBoundingClientRect(), graphBox = gd.getBoundingClientRect();
       const px = Number.isFinite(point.xPixel) ? point.xPixel : event.xPixel;
       const py = Number.isFinite(point.yPixel) ? point.yPixel : event.yPixel;
@@ -436,7 +466,7 @@ def chart(complete, xkey, ykey, chart_id):
       const y = graphBox.top - frameBox.top + py - 9;
       tip.style.left = Math.max(tip.offsetWidth / 2 + 6,
         Math.min(frame.clientWidth - tip.offsetWidth / 2 - 6, x)) + 'px';
-      tip.style.top = Math.max(tip.offsetHeight + 6, y) + 'px';
+      tip.style.top = Math.round(Math.max(tip.offsetHeight + 6, y)) + 'px';
     });
     gd.on('plotly_unhover', () => { tip.hidden = true; });
     gd.on('plotly_relayout', () => { tip.hidden = true; });
@@ -1043,7 +1073,9 @@ def page(items):
 .content {{min-width:0;width:100%;padding:0 0 100px}} .topbar {{height:68px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #dce3ec;background:var(--page)}} .topbar-context {{color:#697b93;font-size:12px;font-weight:650}} .language-group {{display:inline-flex;gap:2px;padding:3px;border:1px solid #d4deea;border-radius:9px;background:#eaf0f6}} .language-group button {{border:0;border-radius:6px;background:transparent;color:#687b92;padding:6px 11px;font:650 12px/1.3 var(--font-body);cursor:pointer;transition:background .18s,color .18s,box-shadow .18s}} .language-group button:hover {{color:#244d78}} .language-group button[aria-pressed="true"] {{background:var(--surface);color:#234f7f;box-shadow:0 1px 4px #1b365729}} .language-group button:focus-visible {{outline:2px solid #4779b1;outline-offset:2px}}
 .hero {{padding:38px 0 44px;scroll-margin-top:24px}} .eyebrow,.section-kicker {{color:#3b6fa8;font:750 16px/1.4 var(--font-data);letter-spacing:.06em}} h1 {{max-width:1120px;font:750 clamp(30px,3vw,45px)/1.16 var(--font-display);letter-spacing:-.025em;margin:10px 0 13px}} .lead {{color:#52657d;font-size:17px;margin:0}} .summary-strip {{display:flex;align-items:stretch;width:max-content;max-width:100%;margin-top:24px;background:#fff;border:1px solid #dfe6ee;border-radius:10px;box-shadow:0 4px 18px #25354a08}} .summary-item {{display:flex;align-items:baseline;gap:11px;padding:14px 25px;border-right:1px solid #e6ebf2}} .summary-item:last-child {{border-right:0}} .summary-item strong {{font:700 23px/1 var(--font-data);color:#1f426b;font-variant-numeric:tabular-nums}} .summary-item span {{font-size:10px;letter-spacing:.1em;font-weight:700;color:#7788a0}}
 .chart-section,.method-section {{margin:0 0 46px;scroll-margin-top:24px}} .section-heading {{padding:0 2px 17px}} h2 {{font:720 27px/1.25 var(--font-display);margin:6px 0 8px;letter-spacing:-.02em}} .section-heading p {{margin:0;color:#5f7188;font-size:14px;line-height:1.55}} .panel {{border:1px solid #dce4ee;background:#fff;border-radius:12px;margin:0 0 20px;padding:20px 18px 14px;overflow:hidden;scroll-margin-top:24px;box-shadow:0 10px 30px #283b540d;color:#24364d}} h3 {{font:700 20px/1.3 var(--font-display);margin:0 0 5px}} .chart-desc {{color:#64758b;font-size:14px;margin:0 0 8px}} .reading-note {{border-top:1px solid #e4eaf1;margin:2px 0 0;padding:11px 3px 1px;color:#61738a;font-size:13px;line-height:1.5}} .reading-note strong {{color:#2d517d}}
-.plot-frame {{position:relative}} .point-tooltip {{position:absolute;z-index:20;max-width:220px;width:max-content;white-space:pre-line;transform:translate(-50%,-100%);pointer-events:none;padding:6px 9px;border:1px solid #9eb0c6;border-radius:7px;background:rgba(255,255,255,.86);color:#18304e;font:12px/1.35 var(--font-data);box-shadow:0 4px 14px #24364b30}}
+.plot-frame {{position:relative}} .point-tooltip {{position:absolute;z-index:20;width:max-content;white-space:pre-line;transform:translate(-50%,-100%);pointer-events:none;padding:6px 9px;border:1px solid #9eb0c6;border-radius:7px;background:rgba(255,255,255,.86);color:#18304e;font:12px/16px var(--font-data);box-shadow:0 4px 14px #24364b30}}
+.point-tip-title {{font-weight:600;text-align:center;white-space:nowrap}} .point-tip-values {{margin-top:5px;padding-top:5px;border-top:1px solid #c4c4c4;white-space:pre-line}}
+.point-tip-metrics {{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}} .point-tip-metric {{min-width:0;white-space:nowrap}} .point-tip-metric + .point-tip-metric {{border-left:1px solid #c4c4c4;padding-left:8px}} .point-tip-note {{margin-top:4px}}
 .point-tooltip[hidden],.bar-tooltip[hidden] {{display:none}} .bar-tooltip {{position:fixed;z-index:100;min-width:210px;max-width:270px;pointer-events:none;padding:10px 12px;border:1px solid #c8c5bd;border-radius:8px;background:rgba(242,240,233,.94);color:#202833;font:12px/1.4 var(--font-body);box-shadow:0 6px 22px #0007}}
 .bar-tip-title {{display:block;font-size:13px;margin-bottom:3px}} .bar-tip-meta {{color:#5b6570;border-bottom:1px solid #cdd0d2;padding-bottom:5px;margin-bottom:5px;white-space:pre-line}} .bar-tip-row {{display:flex;align-items:center;gap:6px;padding:2px 0}} .bar-tip-dot {{width:9px;height:9px;border-radius:50%;flex:none}} .bar-tip-name {{flex:1}} .bar-tip-value {{margin-left:8px;font-family:var(--font-data)}}
 .js-plotly-plot .scatterlayer .trace .js-line {{transition:stroke-opacity .28s ease,stroke-width .28s ease}} .js-plotly-plot .scatterlayer .trace .point {{transition:opacity .28s ease,stroke .28s ease,stroke-width .28s ease}}
