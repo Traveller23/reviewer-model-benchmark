@@ -2,7 +2,7 @@
 
 **[English](README.md)** · 简体中文
 
-[打开已发布的 Benchmark 页面](https://traveller23.github.io/reviewer-model-benchmark/)
+[打开已发布的 Benchmark 页面](https://reviewer-model-benchmark.pages.dev/reviewer-model-benchmark/)
 
 本工具读取同目录的 `statistics.json`, 生成可离线打开的 `charts.html`, 用于比较不同模型和推理强度在 4 项 Reviewer 基准中的分数, 平均耗时, 平均 token 用量及等效 API 费用. 页面包含 5 张柱状图, 3 张散点图, 以及可按需显示的帕累托前沿.
 
@@ -63,9 +63,6 @@ Bonsai 2 是 [Prism ML 基于 Qwen3.8-27B 制作的三值权重模型](https://h
 ├── README.md
 ├── README.zh-CN.md
 ├── .env.example
-├── .github/
-│   └── workflows/
-│       └── pages.yml
 └── resources/
     ├── site.css
     ├── favicon.svg
@@ -144,6 +141,16 @@ Reviewer 的分数只对正分重复求平均. 某次重复为 0 分、分数不
 
 本工具不运行 benchmark, 不读取原 effort 目录, 不自动同步新数据, 也不修改输入 JSON. `statistics.json` 应从可信的 benchmark 结果复制; 生成脚本只依据这份同目录快照工作.
 
-## GitHub Pages 发布
+## 发布
 
-`.github/workflows/pages.yml` 从仓库内的快照生成 `index.html`, 并连同 `resources/`、`statistics.json` 和 `build.py` 发布. 页面资源使用相对路径, 因此可在仓库子路径访问. 在仓库设置中将 Pages 来源设为 **GitHub Actions**; GitHub Free 下仓库需要公开. 工作流不会设置自定义域名. 本地的 `charts.html` 仍不加入 Git.
+Cloudflare Pages 连接到这个 GitHub 仓库, 使用 Python 3.12 和 Plotly 6.9.0 从 `master` 分支构建页面, 构建输出目录为 `_site`. 以下命令从仓库中的快照生成发布文件:
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install plotly==6.9.0
+mkdir -p _site/reviewer-model-benchmark/resources
+cp -R resources/. _site/reviewer-model-benchmark/resources/
+.venv/bin/python build.py statistics.json _site/reviewer-model-benchmark/index.html
+```
+
+页面资源使用相对路径, 因此可以在该子路径访问. 本地的 `charts.html` 不加入 Git. 自定义域名在仓库外配置.

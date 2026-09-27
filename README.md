@@ -2,7 +2,7 @@
 
 **English** · [简体中文](README.zh-CN.md)
 
-[Open the published benchmark page](https://traveller23.github.io/reviewer-model-benchmark/)
+[Open the published benchmark page](https://reviewer-model-benchmark.pages.dev/reviewer-model-benchmark/)
 
 This repository builds a static benchmark page from `statistics.json`. It compares five hosted GPT models and one locally served Bonsai 2 model on four AI review roles at different reasoning effort settings. The page has five bar charts, three scatter plots, and optional Pareto fronts. The results describe this specific workload, not a general model ranking or authorization for production review.
 
@@ -71,10 +71,9 @@ These settings document the recorded deployment, not a performance guarantee. A 
 | --- | --- |
 | `statistics.json` | Independent schema-v4 snapshot of per-scenario runtime observations and per-repetition scores. |
 | `build.py` | Computes chart metrics and generates HTML. |
-| `charts.html` | Generated local page; excluded from Git because GitHub Pages rebuilds it. |
+| `charts.html` | Generated local page; excluded from Git. |
 | `.env.example` | Template for the maintainer's local, ignored `.env` file. |
 | `resources/` | Local CSS, favicon, bundled fonts, and font licenses. |
-| `.github/workflows/pages.yml` | Builds and publishes `index.html` to GitHub Pages. |
 
 The checked-in `statistics.json` is an independent snapshot. To refresh it, a maintainer copies `.env.example` to the ignored `.env` file and sets `BENCHMARK_SOURCE_STATISTICS` there to the trusted source file's absolute path. The site build reads only the checked-in snapshot; it does not read `.env` or silently synchronize data from another checkout. To copy and verify a new snapshot from the repository root in Bash:
 
@@ -130,4 +129,14 @@ Scatter plots compare equivalent cost with score, time with score, and time with
 
 ## Publishing
 
-The Pages workflow builds fresh HTML from the checked-in snapshot, places it at `index.html`, and publishes it with `resources/`, `statistics.json`, and `build.py`. The project site works at a repository subpath because its asset links are relative. Set the repository's Pages source to **GitHub Actions**; GitHub Free requires the repository to be public. The workflow does not configure a custom domain. Font source and license details are in [resources/fonts/README.md](resources/fonts/README.md).
+Cloudflare Pages is connected to this GitHub repository and builds the `master` branch with Python 3.12 and Plotly 6.9.0. Its build output directory is `_site`. These commands create the published subpath from the checked-in snapshot:
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install plotly==6.9.0
+mkdir -p _site/reviewer-model-benchmark/resources
+cp -R resources/. _site/reviewer-model-benchmark/resources/
+.venv/bin/python build.py statistics.json _site/reviewer-model-benchmark/index.html
+```
+
+The page's asset links are relative to that `index.html`. The local `charts.html` stays out of Git. Custom domain settings are managed outside this repository. Font source and license details are in [resources/fonts/README.md](resources/fonts/README.md).
