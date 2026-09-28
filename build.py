@@ -555,6 +555,7 @@ def bar_tooltip_script(chart_id, details_en, details_zh, by_role=False):
       axisOverlay.style.height = tickSvg.getBoundingClientRect().height + 'px';
       axisOverlay.replaceChildren(ticks, ...(title ? [title] : []));
       axisOverlay.hidden = false;
+      if (typeof fitLogTickLabels === 'function') fitLogTickLabels(gd, 'yaxis', axisOverlay);
     };
     viewport.addEventListener('scroll', () => {
       keepModebarVisible();
@@ -1153,12 +1154,38 @@ function setLanguage(language) {{
 }}
 document.getElementById('language-en').addEventListener('click', () => {{ if (window.chartLanguage !== 'en') setLanguage('en'); }});
 document.getElementById('language-zh').addEventListener('click', () => {{ if (window.chartLanguage !== 'zh') setLanguage('zh'); }});
+function fitLogTickLabels(chart, axis, root = chart) {{
+  const labels = [...root.querySelectorAll('.' + axis[0] + 'tick text')];
+  for (const label of labels) label.style.removeProperty('visibility');
+  if (chart._fullLayout[axis].type !== 'log') return;
+  const horizontal = axis === 'xaxis';
+  const gap = horizontal ? 8 : 4;
+  // Fit labels to their rendered size while keeping Plotly's grid and tick positions.
+  const candidates = labels.map(label => {{
+    const bounds = label.getBoundingClientRect();
+    const value = Number(label.textContent.replace(/[$,\\s]/g, '').replace('−', '-'));
+    const exponent = Math.log10(value);
+    return {{label, start:horizontal ? bounds.left : bounds.top,
+      end:horizontal ? bounds.right : bounds.bottom,
+      size:horizontal ? bounds.width : bounds.height,
+      major:Number.isFinite(exponent) && Math.abs(exponent - Math.round(exponent)) < 1e-8}};
+  }}).filter(candidate => candidate.size > 0);
+  candidates.sort((a,b) => Number(b.major) - Number(a.major) || a.start - b.start);
+  const kept = [];
+  for (const candidate of candidates) {{
+    if (kept.some(other => candidate.start < other.end + gap && candidate.end + gap > other.start))
+      candidate.label.style.visibility = 'hidden';
+    else kept.push(candidate);
+  }}
+}}
 for (const control of document.querySelectorAll('.cost-scale-control')) {{
+  const axis = control.dataset.axis + 'axis';
+  const chart = document.getElementById(control.dataset.plot);
+  chart.on('plotly_afterplot', () => fitLogTickLabels(chart, axis));
+  fitLogTickLabels(chart, axis);
   control.addEventListener('click', event => {{
     const button = event.target.closest('button[data-scale]');
     if (!button || button.getAttribute('aria-pressed') === 'true') return;
-    const axis = control.dataset.axis + 'axis';
-    const chart = document.getElementById(control.dataset.plot);
     Plotly.relayout(chart, {{[axis + '.type']:button.dataset.scale, [axis + '.autorange']:true}});
     for (const candidate of control.querySelectorAll('button[data-scale]'))
       candidate.setAttribute('aria-pressed', String(candidate === button));
