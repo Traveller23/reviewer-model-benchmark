@@ -219,7 +219,7 @@ h2 {
   font: 640 22px/1.24 var(--font-display);
   margin: 0 0 5px;
 }
-.chart-desc { color: #65645f; font-size: 14px; line-height: 1.5; }
+.chart-desc { color: #65645f; font-size: 14px; line-height: 1.5; margin: 0 0 24px; }
 .reading-note {
   border-top-color: var(--line);
   color: #666660;
@@ -376,6 +376,7 @@ h2 {
   border-radius: 0;
   box-shadow: none;
 }
+.plot-frame .js-plotly-plot .modebar { top: var(--modebar-top, -5px) !important; }
 .js-plotly-plot .modebar-btn path { fill: #786b5a !important; }
 .js-plotly-plot .modebar-btn:hover path,
 .js-plotly-plot .modebar-btn.active path { fill: #94652f !important; }

@@ -359,7 +359,8 @@ def chart(complete, xkey, ykey, chart_id):
                                 visible="legendonly", hoverinfo="skip",
                                 marker={"size": 11, "color": "rgba(0,0,0,0)",
                                         "line": {"color": PARETO_COLOR, "width": 2.5}}))
-    figure.update_layout(template="plotly_white", height=600, margin={"l": 75, "r": 32, "t": 60, "b": 70},
+    figure.update_layout(template="plotly_white", height=600, autosize=True,
+                         margin={"l": 75, "r": 32, "t": 60, "b": 70},
                          paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor=CHART_PLOT,
                          font={"color": CHART_TEXT, "family": CHART_FONT},
                          legend={"orientation": "h", "y": 1.02, "yanchor": "bottom", "x": 0,
@@ -380,6 +381,38 @@ def chart(complete, xkey, ykey, chart_id):
     const gd = document.getElementById('{plot_id}');
     const frame = document.getElementById('benchmark-frame-CHART_ID');
     const tip = document.getElementById('benchmark-tooltip-CHART_ID');
+    // Keep the toolbar above the rendered legend and preserve the plotting height as it wraps.
+    const plotHeight = gd.layout.height - gd.layout.margin.t - gd.layout.margin.b;
+    // Match the original single-row spacing and the toolbar's -5px inset.
+    const toolbarGap = 0.65, toolbarPadding = -5;
+    let headerPending = false;
+    const fitChartHeader = () => {
+      const legend = gd.querySelector('g.legend');
+      const toolbar = gd.querySelector('.modebar');
+      if (!legend || !toolbar) return;
+      const legendBox = legend.getBoundingClientRect();
+      const toolbarBox = toolbar.getBoundingClientRect();
+      const legendGap = plotHeight * (gd.layout.legend.y - 1);
+      const top = Math.round(
+        legendBox.height + toolbarBox.height + toolbarGap + toolbarPadding + legendGap);
+      const height = plotHeight + top + gd.layout.margin.b;
+      // Plotly's HTML wrapper reserves the page's flow height separately from the SVG.
+      gd.parentElement.style.height = height + 'px';
+      if (gd.layout.margin.t !== top || gd._fullLayout.height !== height) {
+        Plotly.relayout(gd, {'margin.t': top, height, autosize: true});
+        return;
+      }
+      const parentBox = toolbar.offsetParent.getBoundingClientRect();
+      gd.style.setProperty('--modebar-top',
+        (legendBox.top - parentBox.top - toolbarBox.height - toolbarGap) + 'px');
+    };
+    const scheduleChartHeader = () => {
+      if (headerPending) return;
+      headerPending = true;
+      requestAnimationFrame(() => { headerPending = false; fitChartHeader(); });
+    };
+    gd.on('plotly_afterplot', scheduleChartHeader);
+    scheduleChartHeader();
     frame.addEventListener('wheel', event => {
       if (!event.ctrlKey) event.stopPropagation();
     }, {capture:true, passive:true});
