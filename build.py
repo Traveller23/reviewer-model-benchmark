@@ -12,6 +12,7 @@ import plotly.graph_objects as go
 import plotly.io as pio
 
 
+SCORING_VERSION = "v1.1"
 REVIEWERS = (
     ("code-standards-reviewer", "Code Standards", 0.20),
     ("code-spec-reviewer", "Code Spec", 0.20),
@@ -35,9 +36,9 @@ TOKEN_COLORS = {"input": "#6388b7", "cachedInput": "#5f9e98", "output": "#b3935e
 EFFORTS = {"low": 0, "medium": 1, "high": 2, "xhigh": 3, "max": 4}
 MODEL_ORDER = (
     "gpt-6-astra", "gpt-6-sol", "gpt-5.6-sol",
-    "gpt-6-luna", "gpt-5.6-luna", "Ternary-Bonsai-2-27B-PQ2_0.gguf",
+    "gpt-6-luna", "gpt-5.6-luna", "deepseek-flash", "Ternary-Bonsai-2-27B-PQ2_0.gguf",
 )
-MODEL_COLORS = ("#4c78b8", "#198f76", "#8659b9", "#b47627", "#bb5272", "#2f8fa9")
+MODEL_COLORS = ("#4c78b8", "#198f76", "#8659b9", "#b47627", "#bb5272", "#d07849", "#2f8fa9")
 ROLE_COLORS = ("#6388b7", "#5f9e98", "#b3935e", "#9b7fb5")
 CHART_TEXT = "#5c5e5c"
 CHART_PLOT = "#f8f5ef"
@@ -46,15 +47,10 @@ CHART_FONT = "Source Sans 3, Source Han Sans, sans-serif"
 CHART_DATA_FONT = "Source Sans 3, Source Han Sans, sans-serif"
 PARETO_COLOR = "#e6aa00"
 BAR_EFFORT_ORDER = tuple(sorted(EFFORTS, key=EFFORTS.get, reverse=True))
-# Official Standard short-context API rates in USD per million tokens, checked 2026-09-25.
-PRICES = {
-    "gpt-6-astra": (10.0, 1.0, 50.0),
-    "gpt-6-sol": (2.0, 0.2, 10.0),
-    "gpt-6-luna": (0.1, 0.01, 0.5),
-    "gpt-5.6-sol": (4.0, 0.4, 20.0),
-    "gpt-5.6-luna": (0.2, 0.02, 1.2),
-    "Ternary-Bonsai-2-27B-PQ2_0.gguf": (0.424, 0.085, 1.696),
-}
+# Versioned, locally reproducible reference prices and official billing rules.
+PRICING = json.loads(Path(__file__).with_name("pricing.json").read_text(encoding="utf-8"))
+PRICES = {model: tuple(rule["rates"][key] for key in TOKEN_KEYS)
+          for model, rule in PRICING["models"].items()}
 MODEL_PALETTE = dict(zip(MODEL_ORDER, MODEL_COLORS))
 LEGEND_GAP = "\u00a0" * 10
 
@@ -110,12 +106,20 @@ def favicon_svg():
 
 
 def model_label(model):
-    return model.replace("Ternary-Bonsai-2-27B-PQ2_0.gguf", "Bonsai 2")
+    return {"Ternary-Bonsai-2-27B-PQ2_0.gguf": "Bonsai 2",
+            "deepseek-flash": "DeepSeek V4.1 Flash"}.get(model, model)
 
 
 def label(item):
     config = item["configuration"]
     return f"{model_label(config['model'])} / {config['reasoningEffort']}"
+
+
+def reviewer_axis_label(record):
+    title = record["label"].replace(" / ", "<br>")
+    if record["model"] == "deepseek-flash":
+        title = f"DeepSeek<br>V4.1 Flash<br>{record['effort']}"
+    return f'<span style="color:{MODEL_PALETTE[record["model"]]}">{title}</span>'
 
 
 def finite_number(value):
@@ -221,7 +225,7 @@ def extract(items):
                 duration_ms, usage, time_count, token_count = average_role_runtime(
                     reviewer_id, result[1], observations)
                 cost = (sum(usage[key] * rate for key, rate in zip(TOKEN_KEYS, PRICES[model]))
-                        / 1_000_000 if usage is not None else None)
+                        / PRICING["tokensPerUnit"] if usage is not None else None)
                 token_errors = sorted({
                     observation.get("runtime", {}).get("tokenUsageError")
                     for number in result[1]
@@ -626,8 +630,7 @@ def detail_bar_chart(grouped, metric):
     ordered = sorted(grouped, key=lambda record: (model_rank[record["model"]],
                                                   -EFFORTS[record["effort"]]))
     xlabels = [record["label"] for record in ordered]
-    ticktext = [f'<span style="color:{MODEL_PALETTE[record["model"]]}">'
-                f'{record["label"].replace(" / ", "<br>")}</span>' for record in ordered]
+    ticktext = [reviewer_axis_label(record) for record in ordered]
     details = {language: {} for language in ("en", "zh")}
     for record in ordered:
         for language in details:
@@ -717,9 +720,7 @@ def bars(grouped, complete):
     complete = sorted(complete, key=lambda record: (model_rank[record["model"]],
                                                      -EFFORTS[record["effort"]]))
     xlabels = [record["label"] for record in grouped]
-    ticktext = [title.replace(" / ", "<br>") for title in xlabels]
-    colored_ticktext = [f'<span style="color:{MODEL_PALETTE[record["model"]]}">'
-                        f'{ticktext[index]}</span>' for index, record in enumerate(grouped)]
+    colored_ticktext = [reviewer_axis_label(record) for record in grouped]
     weighted = {record["label"]: record["score"] for record in complete}
     role_details = {language: {} for language in ("en", "zh")}
     for record in grouped:
@@ -746,7 +747,7 @@ def bars(grouped, complete):
                                textposition="outside", textangle=0, cliponaxis=False,
                                textfont={"color": CHART_TEXT, "family": CHART_DATA_FONT,
                                          "size": 10}, hoverinfo="none"))
-    # Each category gets about one two-line label's width. Bars occupy most of
+    # Each category gets about one short model label's width. Bars occupy most of
     # that slot, leaving only a small separation between adjacent categories.
     chart_width = max(1200, len(xlabels) * 84)
     multi.update_layout(barmode="group", bargap=0.18, bargroupgap=0.10,
@@ -880,15 +881,18 @@ def page_copy():
             "nav_reviewer_tokens": "Token usage", "nav_reviewer_cost": "Equivalent API cost",
             "nav_method": "Method & data",
             "eyebrow": "MODEL COMPARISON / BENCHMARK",
-            "headline": "AI models on four software review tasks",
-            "lead": "A Reviewer is an AI agent assigned a software review task. Here, six models perform four such tasks at different reasoning effort settings; the charts compare their scores, average run times and equivalent API costs.",
+            "headline": "Comparing AI models for software review",
+            "lead": "A Reviewer is an AI agent assigned a software review task. Here, {model_count} models perform four such tasks at different reasoning effort settings; the charts compare their task performance, time and cost.",
+            "version_title": f"Scoring version {SCORING_VERSION}",
+            "version_summary": "Updated statistical treatment of existing scores; added DeepSeek V4.1 Flash.",
+            "version_readme": f"For changes in {SCORING_VERSION}, see the project",
             "stat_models": "MODELS", "stat_configurations": "CONFIGURATIONS", "stat_benchmarks": "REVIEWER BENCHMARKS",
             "readme_more": "For local deployment details, see the project",
             "score_kicker": "01 / QUALITY", "score_title": "Weighted score by reasoning effort",
             "score_desc": "Each model forms a group. Its bars show reasoning effort levels, ordered from highest to lowest. A reviewer without a usable score contributes zero to the weighted score.",
             "score_context": "Reasoning-effort labels are requested settings, not comparable compute budgets across models.",
             "score_bonsai": "Bonsai 2 is Prism ML's Qwen3.8-27B-derived model, run locally on Windows.",
-            "score_read": "Each group is a model and each bar an effort setting. Scores run from 0 to 1; taller is better. This result covers these review tasks, not general model ability.",
+            "score_read": "Each group is a model and each bar an effort setting. Scores run from 0 to 100; taller is better. This result covers these review tasks, not general model ability.",
             "trade_kicker": "02 / TRADE-OFFS", "trade_title": "Quality, time and cost",
             "trade_intro": "Each dot represents one model and reasoning effort configuration. Connecting lines follow effort levels within the same model. A Pareto-front point has no other visible point that is at least as good on both plotted measures and better on one. Click Pareto Front in a legend to show those points and their connecting line. Hold Ctrl while scrolling over a chart to zoom.",
             "cost_score_title": "Equivalent API cost vs. score",
@@ -922,9 +926,9 @@ def page_copy():
             "method_kicker": "DATA NOTES", "method_title": "How scores and costs are calculated",
             "method_score": "A reviewer score averages only positive-score repetitions. A zero or unavailable score, including a missing repetition record, does not enter the average. If any repetition is excluded this way, multiply the reviewer's positive-score average by 0.9 once, even if several are excluded. A positive repetition score is also multiplied by 0.9 once if its score record is marked diagnostic, its scoring copy was corrected by the supervising agent, or both. These are the only two possible 0.9 factors. A reviewer with no positive score, or no reviewer record, contributes zero to the weighted score. All four weights always apply.",
             "method_runtime": "Time and tokens use only repetitions with a positive score. For each repetition, use the time and three token counts recorded for its normal review scenario. If a repetition also has an early-return scenario, do not add or average its time or tokens. Within each reviewer, average recorded time values and complete sets of three token counts separately. The time shown for a model and effort is then the arithmetic mean of reviewers with time data; each token count is averaged separately.",
-            "method_cost": "Equivalent API cost first applies published per-million-token prices to each reviewer's average uncached input, cached input and output tokens, then takes the arithmetic mean of available reviewer costs. GPT uses OpenAI Standard short-context rates; local Bonsai 2 uses the public Alibaba Cloud Beijing qwen3.8-27b API rate. Prices checked 2026-09-25. Cache writes, long context and tool charges are excluded.",
+            "method_cost": "Equivalent API cost converts token usage to USD at published API rates, then averages the costs of reviewers with token data. DeepSeek cost uses the arithmetic mean of peak and off-peak rates.",
             "method_missing": "If a reviewer has no positive-score repetition, its time, tokens and cost cannot be calculated. If a positive-score repetition's normal review scenario has no usable time value, omit only that repetition from the time average; time is unavailable only if none have a usable value. If the normal review scenario lacks any of the three token counts, omit that repetition from all three token averages; tokens and cost are unavailable only if no positive-score repetition has a complete set. A token count of zero is valid. Only that reviewer's affected detail bars are omitted; the model and effort still average the other reviewers with data.",
-            "openai_prices": "OpenAI pricing", "luna_prices": "GPT-5.6 Luna pricing", "qwen_prices": "Qwen pricing",
+            "openai_prices": "OpenAI pricing", "luna_prices": "GPT-5.6 Luna pricing", "qwen_prices": "Qwen pricing", "deepseek_prices": "DeepSeek pricing",
             "footer_name": "Reviewer Model Benchmark",
             "footer_copyright": "© 2026 Tranzvision",
             "read_label": "How to read",
@@ -940,15 +944,18 @@ def page_copy():
             "nav_reviewer_tokens": "Token 用量", "nav_reviewer_cost": "等效 API 费用",
             "nav_method": "方法与数据",
             "eyebrow": "模型比较 / 基准",
-            "headline": "六个 AI 模型完成四类软件审查任务",
-            "lead": "Reviewer 是负责一项软件审查任务的 AI 代理. 这里让六个模型以不同推理强度完成四类任务, 比较分数、单次运行的平均耗时和等效 API 费用.",
+            "headline": "AI 软件审查模型对比",
+            "lead": "Reviewer 是负责一项软件审查任务的 AI 代理. 这里让 {model_count} 个模型以不同推理强度完成四类任务, 比较完成任务的能力、耗时和费用.",
+            "version_title": f"评分版本 {SCORING_VERSION}",
+            "version_summary": "调整原有评分的统计口径; 新增 DeepSeek V4.1 Flash.",
+            "version_readme": f"{SCORING_VERSION} 的变更请见项目",
             "stat_models": "模型", "stat_configurations": "模型配置", "stat_benchmarks": "REVIEWER 基准",
             "readme_more": "本地部署详情请见项目",
             "score_kicker": "01 / 质量", "score_title": "按推理强度比较综合分数",
             "score_desc": "每组是一个模型, 柱子按从高到低显示各档推理强度. 没有可用分数的 Reviewer 以 0 分参与综合分数.",
             "score_context": "推理强度标签是请求设置, 不代表不同模型使用了相同的计算量.",
             "score_bonsai": "Bonsai 2 是 Prism ML 基于 Qwen3.8-27B 制作的模型, 在本机 Windows 上运行.",
-            "score_read": "每组是一个模型, 每根柱子是一档推理强度. 分数范围为 0 至 1, 越高越好. 结果只针对这些审查任务, 不代表模型通用能力.",
+            "score_read": "每组是一个模型, 每根柱子是一档推理强度. 分数范围为 0 至 100, 越高越好. 结果只针对这些审查任务, 不代表模型通用能力.",
             "trade_kicker": "02 / 权衡", "trade_title": "质量, 耗时与费用",
             "trade_intro": "每个点代表一个模型与推理强度组合, 连线连接同一模型的不同推理强度. 对前沿上的点, 其他可见点无法在两项指标上都不差、且至少一项更好. 点击图例中的帕累托前沿, 即可显示这些点及其连线. 按住 Ctrl 并在图表上滚动滚轮可缩放.",
             "cost_score_title": "等效 API 费用与分数",
@@ -982,9 +989,9 @@ def page_copy():
             "method_kicker": "数据说明", "method_title": "分数与费用的计算方法",
             "method_score": "Reviewer 的分数只对正分重复求平均. 某次重复为 0 分、分数不可用, 或整条重复记录缺失时, 这次不参与平均; 只要出现其中任一种情况, 就将该 Reviewer 的正分平均值乘以一次 0.9, 出现多次仍只乘一次. 单次正分重复若在评分记录中标为诊断评分、使用负责统筹的代理修正过的评分副本, 或同时满足两种情况, 都只乘以一次 0.9. 因此最多只有两次 0.9. 某项 Reviewer 没有正分重复, 或缺少整项记录时, 以 0 分参与综合分数; 四项固定权重始终生效.",
             "method_runtime": "耗时和 token 只统计分数大于 0 的重复. 每次重复只取正常审查场景记录的耗时和三类 token 数量; 若同一次重复还有快速退出场景, 不把它的耗时或 token 相加, 也不与它求平均. 每项 Reviewer 分别对有记录的耗时和三类 token 记录完整的重复求平均. 某个模型与推理强度组合在图中的耗时, 再取有数据 Reviewer 的平均耗时的算术平均值, 三类 token 各自同理.",
-            "method_cost": "等效 API 费用先将每项 Reviewer 的平均未缓存输入, 缓存输入及输出 token 按公开的每百万 token 单价换算, 再对有数据的 Reviewer 费用求算术平均. GPT 使用 OpenAI Standard 短上下文价格; 本地 Bonsai 2 使用阿里云北京 qwen3.8-27b 公开 API 价格. 价格核对日期: 2026-09-25. 不含缓存写入, 长上下文和工具附加费用.",
+            "method_cost": "等效 API 费用将 token 用量按公开 API 单价换算为美元, 再对有 token 数据的 Reviewer 费用求算术平均. DeepSeek 按高峰和低谷价格的算术平均值计算费用.",
             "method_missing": "某项 Reviewer 若没有正分重复, 其耗时、token 和费用都无法计算. 若某次正分重复的正常审查场景没有可用耗时, 只忽略这次的耗时, 用其余有耗时记录的正分重复求平均; 若一次都没有, 该 Reviewer 的耗时才无法计算. 若某次正分重复的正常审查场景缺少三类 token 数量中的任意一种, 就将这次从三类 token 的平均值中一起排除; 只有一次完整记录都没有, 该 Reviewer 的 token 和费用才无法计算. token 数量为 0 是有效记录. 图中只省略该 Reviewer 对应的明细柱, 该模型与推理强度组合仍对其他有数据的 Reviewer 求平均.",
-            "openai_prices": "OpenAI 价格", "luna_prices": "GPT-5.6 Luna 价格", "qwen_prices": "Qwen 价格",
+            "openai_prices": "OpenAI 价格", "luna_prices": "GPT-5.6 Luna 价格", "qwen_prices": "Qwen 价格", "deepseek_prices": "DeepSeek 价格",
             "footer_name": "Reviewer 模型基准",
             "footer_copyright": "© 2026 Tranzvision",
             "read_label": "如何阅读",
@@ -999,7 +1006,10 @@ def page(items):
         raise ValueError("Expected a nonempty schema-version-4 statistics.json array.")
     grouped, complete = extract(items)
     copy = page_copy()
+    model_count = len({record["model"] for record in grouped})
     for language in ("en", "zh"):
+        for key in ("headline", "lead"):
+            copy[language][key] = copy[language][key].format(model_count=model_count)
         copy[language]["missing_time_note"] = missing_detail_note(grouped, "minutes", language)
         copy[language]["missing_token_note"] = missing_detail_note(grouped, "cost", language)
     today = date.today()
@@ -1064,6 +1074,7 @@ def page(items):
     i18n_json = json.dumps(copy, ensure_ascii=False).replace("<", "\\u003c")
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>Reviewer Model Benchmark</title>
+<meta name="benchmark-scoring-version" content="{SCORING_VERSION}">
 <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
 <style>
 :root {{--page:#f4f6fa;--surface:#fff;--line:#dce4ee;--text:#18263b;--muted:#64758b;--accent:#2c609e;--font-body:'Segoe UI Variable Text','Segoe UI',Arial,'Noto Sans SC',sans-serif;--font-display:'Segoe UI Variable Display','Segoe UI',Arial,'Noto Sans SC',sans-serif;--font-data:'Cascadia Code',Consolas,monospace;color-scheme:light}} * {{box-sizing:border-box}} html {{scroll-behavior:smooth}} body {{margin:0;background:var(--page);color:var(--text);font:16px/1.58 var(--font-body)}} a {{color:var(--accent)}}
@@ -1101,14 +1112,14 @@ def page(items):
 <a href="#method" data-i18n="nav_method">{en['nav_method']}</a></nav></div>
 </aside>
 <main class="content"><div class="topbar">{phrase('topbar_context', 'span', 'topbar-context')}<div class="language-group" id="language-group" role="group" aria-label="Language"><button id="language-en" type="button" aria-pressed="true">English</button><button id="language-zh" type="button" aria-pressed="false">中文</button></div></div>
-<section class="hero" id="overview">{phrase('eyebrow', 'div', 'eyebrow')}{phrase('headline', 'h1')}{phrase('lead', 'p', 'lead')}<div class="summary-strip"><div class="summary-item">{icon('models', 'summary-mark')}<strong>{len({record['model'] for record in grouped})}</strong>{phrase('stat_models')}</div><div class="summary-item">{icon('configurations', 'summary-mark')}<strong>{len(grouped)}</strong>{phrase('stat_configurations')}</div><div class="summary-item">{icon('benchmark', 'summary-mark')}<strong>{len(REVIEWERS)}</strong>{phrase('stat_benchmarks')}</div></div></section>
+<section class="hero" id="overview">{phrase('eyebrow', 'div', 'eyebrow')}{phrase('headline', 'h1')}{phrase('lead', 'p', 'lead')}<div class="version-note">{phrase('version_title', 'strong')} {phrase('version_summary')} {phrase('version_readme')} <a href="https://github.com/Traveller23/reviewer-model-benchmark/blob/master/README.md" data-href-en="https://github.com/Traveller23/reviewer-model-benchmark/blob/master/README.md" data-href-zh="https://github.com/Traveller23/reviewer-model-benchmark/blob/master/README.zh-CN.md">README</a>.</div><div class="summary-strip"><div class="summary-item">{icon('models', 'summary-mark')}<strong>{model_count}</strong>{phrase('stat_models')}</div><div class="summary-item">{icon('configurations', 'summary-mark')}<strong>{len(grouped)}</strong>{phrase('stat_configurations')}</div><div class="summary-item">{icon('benchmark', 'summary-mark')}<strong>{len(REVIEWERS)}</strong>{phrase('stat_benchmarks')}</div></div></section>
 <section class="chart-section" id="score"><div class="section-heading">{phrase('score_kicker', 'div', 'section-kicker')}{phrase('score_title', 'h2')}{phrase('score_desc', 'p')}<p class="section-context">{phrase('score_context')} {phrase('score_bonsai')} {phrase('readme_more')} <a href="https://github.com/Traveller23/reviewer-model-benchmark" data-href-en="https://github.com/Traveller23/reviewer-model-benchmark" data-href-zh="https://github.com/Traveller23/reviewer-model-benchmark/blob/master/README.zh-CN.md">README</a>.</p></div>
 <article class="panel"><div class="bar-tooltip" id="benchmark-bar-tooltip-effort" hidden></div><div class="bar-viewport"><div class="bar-scroll" style="--groups:{len({record['model'] for record in complete})}">{effort_html}</div></div><p class="reading-note"><strong data-i18n="read_label">{en['read_label']}</strong> · {phrase('score_read')}</p></article></section>
 <section class="chart-section" id="tradeoffs"><div class="section-heading">{phrase('trade_kicker', 'div', 'section-kicker')}{phrase('trade_title', 'h2')}{phrase('trade_intro', 'p')}</div>{''.join(scatter_sections)}</section>
 <section class="chart-section" id="reviewers"><div class="section-heading">{phrase('review_kicker', 'div', 'section-kicker')}{phrase('review_title', 'h2')}{phrase('review_desc', 'p')}</div>
 <div class="reviewer-guide">{phrase('reviewer_guide_title', 'h3', 'reviewer-guide-heading')}<div class="reviewer-grid">{''.join(reviewer_guide)}</div>{phrase('reviewer_guide_note', 'p', 'reviewer-guide-note')}</div>
 <article class="panel" id="review-score"><div class="chart-panel-heading">{phrase('detail_score_title', 'h3')}</div><div class="bar-tooltip" id="benchmark-bar-tooltip-grouped" hidden></div><div class="bar-frame"><div class="bar-axis-overlay" aria-hidden="true" hidden></div><div class="bar-viewport"><div class="bar-scroll" style="--groups:{len(grouped)}">{grouped_html}</div></div></div><p class="reading-note"><strong data-i18n="read_label">{en['read_label']}</strong> · {phrase('review_read')}</p></article>{''.join(detail_panels)}</section>
-<section class="method-section" id="method"><div class="section-heading">{phrase('method_kicker', 'div', 'section-kicker')}{phrase('method_title', 'h2')}</div><div class="panel">{phrase('method_score', 'p')}{phrase('method_runtime', 'p')}{phrase('method_cost', 'p')}{phrase('method_missing', 'p')}<div class="source-links"><a href="https://developers.openai.com/api/docs/pricing" target="_blank" rel="noopener noreferrer">{phrase('openai_prices')}{icon('external', 'external-mark')}</a><a href="https://developers.openai.com/api/docs/models/gpt-5.6-luna" target="_blank" rel="noopener noreferrer">{phrase('luna_prices')}{icon('external', 'external-mark')}</a><a href="https://www.alibabacloud.com/help/en/model-studio/qwen3-8-27b" target="_blank" rel="noopener noreferrer">{phrase('qwen_prices')}{icon('external', 'external-mark')}</a></div></div></section>
+<section class="method-section" id="method"><div class="section-heading">{phrase('method_kicker', 'div', 'section-kicker')}{phrase('method_title', 'h2')}</div><div class="panel">{phrase('method_score', 'p')}{phrase('method_runtime', 'p')}{phrase('method_missing', 'p')}{phrase('method_cost', 'p', 'cost-note')}<div class="source-links"><a href="https://developers.openai.com/api/docs/pricing" target="_blank" rel="noopener noreferrer">{phrase('openai_prices')}{icon('external', 'external-mark')}</a><a href="https://developers.openai.com/api/docs/models/gpt-5.6-luna" target="_blank" rel="noopener noreferrer">{phrase('luna_prices')}{icon('external', 'external-mark')}</a><a href="https://api-docs.deepseek.com/quick_start/pricing/" target="_blank" rel="noopener noreferrer">{phrase('deepseek_prices')}{icon('external', 'external-mark')}</a><a href="https://www.alibabacloud.com/help/en/model-studio/qwen3-8-27b" target="_blank" rel="noopener noreferrer">{phrase('qwen_prices')}{icon('external', 'external-mark')}</a></div></div></section>
 </main></div><footer class="page-footer"><div class="footer-brand">{phrase('footer_name', 'span', 'footer-name')}{phrase('footer_copyright', 'span', 'footer-copyright')}</div>{phrase('footer_updated', 'span', 'footer-updated')}</footer><script>
 const translations = {i18n_json};
 window.chartLanguage = 'en';

@@ -36,7 +36,7 @@
         "delivery": {
           "mode": "qwen-final-reply",
           "errors": [],
-          "mainAgentCorrectedScoringCopy": true
+          "mainAgentCorrectedScoringCopy": false
         },
         "completed": true
       },
@@ -253,7 +253,7 @@
               "actor": "commit-audit-generation"
             }
           ],
-          "mainAgentCorrectedScoringCopy": true
+          "mainAgentCorrectedScoringCopy": false
         },
         "completed": true
       },
@@ -300,7 +300,7 @@
               "actor": "commit-audit-generation"
             }
           ],
-          "mainAgentCorrectedScoringCopy": true
+          "mainAgentCorrectedScoringCopy": false
         },
         "completed": true
       },
@@ -372,7 +372,7 @@
         "delivery": {
           "mode": "qwen-final-reply",
           "errors": [],
-          "mainAgentCorrectedScoringCopy": true
+          "mainAgentCorrectedScoringCopy": false
         },
         "completed": true
       },
@@ -406,7 +406,7 @@
         "delivery": {
           "mode": "qwen-final-reply",
           "errors": [],
-          "mainAgentCorrectedScoringCopy": true
+          "mainAgentCorrectedScoringCopy": false
         },
         "completed": true
       },
@@ -545,7 +545,7 @@
         "delivery": {
           "mode": "qwen-final-reply",
           "errors": [],
-          "mainAgentCorrectedScoringCopy": true
+          "mainAgentCorrectedScoringCopy": false
         },
         "completed": true
       }
@@ -557,9 +557,9 @@
           {
             "repetition": 1,
             "score": 0.22967041085909215,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "report-format-correction",
-            "mainAgentCorrectedScoringCopy": true,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
             "deliveryErrors": []
@@ -567,8 +567,8 @@
           {
             "repetition": 2,
             "score": 0.4286952282540003,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "report-format-correction",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -577,8 +577,8 @@
           {
             "repetition": 3,
             "score": 0.6360756747886177,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "report-format-correction",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -592,8 +592,8 @@
           {
             "repetition": 1,
             "score": 0.8336779515315766,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "report-format-correction",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -602,8 +602,8 @@
           {
             "repetition": 2,
             "score": 0.5786343036665788,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "report-format-correction",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -627,9 +627,9 @@
           {
             "repetition": 1,
             "score": 0.5604994038976315,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "commit-audit-fallback",
-            "mainAgentCorrectedScoringCopy": true,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
             "deliveryErrors": [
@@ -643,7 +643,7 @@
             "score": 0.38578784859710896,
             "scoreSource": "diagnostic",
             "diagnosticReason": "commit-audit-fallback",
-            "mainAgentCorrectedScoringCopy": true,
+            "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
             "deliveryErrors": [
@@ -671,9 +671,9 @@
           {
             "repetition": 1,
             "score": 0.21682170761821284,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "corrected-repetition-in-incomplete-batch",
-            "mainAgentCorrectedScoringCopy": true,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 2,
             "expectedInstances": 2,
             "deliveryErrors": []
@@ -693,9 +693,9 @@
           {
             "repetition": 3,
             "score": 0.274102079395085,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "corrected-repetition-in-incomplete-batch",
-            "mainAgentCorrectedScoringCopy": true,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 2,
             "expectedInstances": 2,
             "deliveryErrors": []
@@ -741,7 +741,7 @@
         "delivery": {
           "mode": "qwen-final-reply",
           "errors": [],
-          "mainAgentCorrectedScoringCopy": true
+          "mainAgentCorrectedScoringCopy": false
         },
         "completed": true
       },
@@ -911,7 +911,7 @@
         "delivery": {
           "mode": "qwen-final-reply",
           "errors": [],
-          "mainAgentCorrectedScoringCopy": true
+          "mainAgentCorrectedScoringCopy": false
         },
         "completed": true
       },
@@ -1214,7 +1214,7 @@
         "delivery": {
           "mode": "qwen-final-reply",
           "errors": [],
-          "mainAgentCorrectedScoringCopy": true
+          "mainAgentCorrectedScoringCopy": false
         },
         "completed": true
       },
@@ -1260,9 +1260,9 @@
           {
             "repetition": 1,
             "score": 0.44018006703739415,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "report-format-correction",
-            "mainAgentCorrectedScoringCopy": true,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
             "deliveryErrors": []
@@ -1270,8 +1270,8 @@
           {
             "repetition": 2,
             "score": 0.52064147310562,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "report-format-correction",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -1280,8 +1280,8 @@
           {
             "repetition": 3,
             "score": 0.4996121271372858,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "report-format-correction",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -1295,8 +1295,8 @@
           {
             "repetition": 1,
             "score": 0.7894887844278309,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "report-format-correction",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -1305,8 +1305,8 @@
           {
             "repetition": 2,
             "score": 0.8020992412111192,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "report-format-correction",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -1315,9 +1315,9 @@
           {
             "repetition": 3,
             "score": 0.6918864488507224,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "report-format-correction",
-            "mainAgentCorrectedScoringCopy": true,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
             "deliveryErrors": []
@@ -1374,8 +1374,8 @@
           {
             "repetition": 1,
             "score": 0.242399868380162,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "report-format-correction",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 2,
             "expectedInstances": 2,
@@ -1384,8 +1384,8 @@
           {
             "repetition": 2,
             "score": 0.22979962360647663,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "report-format-correction",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 2,
             "expectedInstances": 2,
@@ -1394,9 +1394,9 @@
           {
             "repetition": 3,
             "score": 0.13611547378655298,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "report-format-correction",
-            "mainAgentCorrectedScoringCopy": true,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 2,
             "expectedInstances": 2,
             "deliveryErrors": []
@@ -1510,7 +1510,7 @@
         "delivery": {
           "mode": "qwen-final-reply",
           "errors": [],
-          "mainAgentCorrectedScoringCopy": true
+          "mainAgentCorrectedScoringCopy": false
         },
         "completed": true
       },
@@ -1544,7 +1544,7 @@
         "delivery": {
           "mode": "qwen-final-reply",
           "errors": [],
-          "mainAgentCorrectedScoringCopy": true
+          "mainAgentCorrectedScoringCopy": false
         },
         "completed": true
       },
@@ -1578,7 +1578,7 @@
         "delivery": {
           "mode": "qwen-final-reply",
           "errors": [],
-          "mainAgentCorrectedScoringCopy": true
+          "mainAgentCorrectedScoringCopy": false
         },
         "completed": true
       },
@@ -1779,7 +1779,7 @@
         "delivery": {
           "mode": "qwen-final-reply",
           "errors": [],
-          "mainAgentCorrectedScoringCopy": true
+          "mainAgentCorrectedScoringCopy": false
         },
         "completed": true
       },
@@ -1813,7 +1813,7 @@
         "delivery": {
           "mode": "qwen-final-reply",
           "errors": [],
-          "mainAgentCorrectedScoringCopy": true
+          "mainAgentCorrectedScoringCopy": false
         },
         "completed": true
       },
@@ -1847,7 +1847,7 @@
         "delivery": {
           "mode": "qwen-final-reply",
           "errors": [],
-          "mainAgentCorrectedScoringCopy": true
+          "mainAgentCorrectedScoringCopy": false
         },
         "completed": true
       },
@@ -1915,7 +1915,7 @@
         "delivery": {
           "mode": "qwen-final-reply",
           "errors": [],
-          "mainAgentCorrectedScoringCopy": true
+          "mainAgentCorrectedScoringCopy": false
         },
         "completed": true
       },
@@ -1961,8 +1961,8 @@
           {
             "repetition": 1,
             "score": 0.5144019553812906,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "report-format-correction",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -1971,8 +1971,8 @@
           {
             "repetition": 2,
             "score": 0.3915957743282108,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "report-format-correction",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -1981,9 +1981,9 @@
           {
             "repetition": 3,
             "score": 0.5186494798012441,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "report-format-correction",
-            "mainAgentCorrectedScoringCopy": true,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
             "deliveryErrors": []
@@ -1996,9 +1996,9 @@
           {
             "repetition": 1,
             "score": 0.7714281982507428,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "corrected-repetition-in-incomplete-batch",
-            "mainAgentCorrectedScoringCopy": true,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
             "deliveryErrors": []
@@ -2006,9 +2006,9 @@
           {
             "repetition": 2,
             "score": 0.8196338985547503,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "corrected-repetition-in-incomplete-batch",
-            "mainAgentCorrectedScoringCopy": true,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
             "deliveryErrors": []
@@ -2033,8 +2033,8 @@
           {
             "repetition": 1,
             "score": 0.8246761184623504,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "commit-audit-fallback",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -2077,9 +2077,9 @@
           {
             "repetition": 1,
             "score": 0.32627080922282564,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "report-format-correction",
-            "mainAgentCorrectedScoringCopy": true,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 2,
             "expectedInstances": 2,
             "deliveryErrors": []
@@ -2087,9 +2087,9 @@
           {
             "repetition": 2,
             "score": 0.14554954282515395,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "report-format-correction",
-            "mainAgentCorrectedScoringCopy": true,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 2,
             "expectedInstances": 2,
             "deliveryErrors": []
@@ -2097,9 +2097,9 @@
           {
             "repetition": 3,
             "score": 0,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "report-format-correction",
-            "mainAgentCorrectedScoringCopy": true,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 2,
             "expectedInstances": 2,
             "deliveryErrors": []
@@ -3129,8 +3129,8 @@
           {
             "repetition": 2,
             "score": 0.5535467436113254,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "spec-readiness-invalid-evidence",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 2,
             "expectedInstances": 2,
@@ -3139,8 +3139,8 @@
           {
             "repetition": 3,
             "score": 0.6724734384595872,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "spec-readiness-invalid-evidence",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 2,
             "expectedInstances": 2,
@@ -3595,8 +3595,8 @@
           {
             "repetition": 1,
             "score": 0.9374897888747558,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "commit-audit-requirement-split",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -3605,8 +3605,8 @@
           {
             "repetition": 2,
             "score": 0.7823812676281263,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "commit-audit-requirement-split",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -4106,8 +4106,8 @@
           {
             "repetition": 1,
             "score": 0.9358484689627938,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "commit-audit-requirement-split",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -4116,8 +4116,8 @@
           {
             "repetition": 2,
             "score": 0.9424475479804931,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "commit-audit-requirement-split",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -4637,8 +4637,8 @@
           {
             "repetition": 3,
             "score": 0.913878827635907,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "commit-audit-requirement-split",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -5136,8 +5136,8 @@
           {
             "repetition": 1,
             "score": 0.8263487955431293,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "completed-repetition-in-incomplete-batch",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -5146,8 +5146,8 @@
           {
             "repetition": 2,
             "score": 0.494925905397188,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "completed-repetition-in-incomplete-batch",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -5185,8 +5185,8 @@
           {
             "repetition": 2,
             "score": 0.24883470788296486,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "completed-repetition-in-incomplete-batch",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 2,
             "expectedInstances": 2,
@@ -5195,8 +5195,8 @@
           {
             "repetition": 3,
             "score": 0.39712089428167674,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "completed-repetition-in-incomplete-batch",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 2,
             "expectedInstances": 2,
@@ -5624,8 +5624,8 @@
           {
             "repetition": 1,
             "score": 0.7084218262024001,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "report-format-correction",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -5644,8 +5644,8 @@
           {
             "repetition": 3,
             "score": 0.7571212018765748,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "report-format-correction",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -5683,8 +5683,8 @@
           {
             "repetition": 3,
             "score": 0.09109917264436965,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "completed-repetition-in-incomplete-batch",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -6114,8 +6114,8 @@
           {
             "repetition": 2,
             "score": 0.5615695350647755,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "report-format-correction",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -6124,8 +6124,8 @@
           {
             "repetition": 3,
             "score": 0.5269088972089496,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "report-format-correction",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -6695,8 +6695,8 @@
           {
             "repetition": 2,
             "score": 0.8552405917136046,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "commit-audit-requirement-split",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -6705,8 +6705,8 @@
           {
             "repetition": 3,
             "score": 0.8024089637508137,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "commit-audit-requirement-split",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -7231,8 +7231,8 @@
           {
             "repetition": 1,
             "score": 0.5982673178703009,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "spec-readiness-invalid-evidence",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 2,
             "expectedInstances": 2,
@@ -7251,8 +7251,8 @@
           {
             "repetition": 3,
             "score": 0.6306679907943327,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "spec-readiness-invalid-evidence",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 2,
             "expectedInstances": 2,
@@ -7717,8 +7717,8 @@
           {
             "repetition": 2,
             "score": 0.9351875087138076,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "commit-audit-requirement-split",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -7727,8 +7727,8 @@
           {
             "repetition": 3,
             "score": 0.9415356016940841,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "commit-audit-requirement-split",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -8218,8 +8218,8 @@
           {
             "repetition": 1,
             "score": 0.9201294955354787,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "commit-audit-requirement-split",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -8238,8 +8238,8 @@
           {
             "repetition": 3,
             "score": 0.9497438616782236,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "commit-audit-requirement-split",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -8729,8 +8729,8 @@
           {
             "repetition": 1,
             "score": 0.9242823702139131,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "commit-audit-requirement-split",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -9240,8 +9240,8 @@
           {
             "repetition": 1,
             "score": 0.9676480405421998,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "commit-audit-requirement-split",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -9260,8 +9260,8 @@
           {
             "repetition": 3,
             "score": 0.9396346302098032,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "commit-audit-requirement-split",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -9751,8 +9751,8 @@
           {
             "repetition": 1,
             "score": 0.9610477929786267,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "commit-audit-requirement-split",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -11284,8 +11284,8 @@
           {
             "repetition": 1,
             "score": 0.8998868200535401,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "commit-audit-requirement-split",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -11304,8 +11304,8 @@
           {
             "repetition": 3,
             "score": 0.8880117632489424,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "commit-audit-requirement-split",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -12316,8 +12316,8 @@
           {
             "repetition": 2,
             "score": 0.8753896053615837,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "commit-audit-requirement-split",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -12326,8 +12326,8 @@
           {
             "repetition": 3,
             "score": 0.8738373516757831,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "commit-audit-requirement-split",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 1,
             "expectedInstances": 1,
@@ -12869,8 +12869,8 @@
           {
             "repetition": 2,
             "score": 0.18255666604994084,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "spec-readiness-requirement-continuation",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 2,
             "expectedInstances": 2,
@@ -12879,8 +12879,8 @@
           {
             "repetition": 3,
             "score": 0.14227017892084606,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "spec-readiness-requirement-continuation",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 2,
             "expectedInstances": 2,
@@ -13370,8 +13370,8 @@
           {
             "repetition": 1,
             "score": 0.31792810523265935,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "spec-readiness-invalid-evidence",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 2,
             "expectedInstances": 2,
@@ -13390,8 +13390,8 @@
           {
             "repetition": 3,
             "score": 0.348013287165796,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "spec-readiness-invalid-evidence",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 2,
             "expectedInstances": 2,
@@ -14399,8 +14399,8 @@
           {
             "repetition": 1,
             "score": 0.4687121124106708,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "spec-readiness-invalid-evidence",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 2,
             "expectedInstances": 2,
@@ -14419,8 +14419,8 @@
           {
             "repetition": 3,
             "score": 0.5795970049158824,
-            "scoreSource": "diagnostic",
-            "diagnosticReason": "spec-readiness-invalid-evidence",
+            "scoreSource": "formal",
+            "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,
             "completedInstances": 2,
             "expectedInstances": 2,
@@ -14930,6 +14930,1674 @@
           {
             "repetition": 3,
             "score": 0.6095592462558929,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 2,
+            "expectedInstances": 2,
+            "deliveryErrors": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "schemaVersion": 4,
+    "configuration": {
+      "model": "deepseek-flash",
+      "reasoningEffort": "low"
+    },
+    "observations": [
+      {
+        "reviewerId": "code-standards-reviewer",
+        "scenarioId": "default",
+        "repetition": 1,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "low",
+          "durationMs": 174262.100725,
+          "tokenUsage": {
+            "input": 27685,
+            "cachedInput": 274944,
+            "output": 31616
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "low",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "code-standards-reviewer",
+        "scenarioId": "default",
+        "repetition": 2,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "low",
+          "durationMs": 150676.301497,
+          "tokenUsage": {
+            "input": 26740,
+            "cachedInput": 276352,
+            "output": 21720
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "low",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "code-standards-reviewer",
+        "scenarioId": "default",
+        "repetition": 3,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "low",
+          "durationMs": 272446.204204,
+          "tokenUsage": {
+            "input": 30179,
+            "cachedInput": 416128,
+            "output": 48235
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "low",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "code-spec-reviewer",
+        "scenarioId": "default",
+        "repetition": 1,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "low",
+          "durationMs": 67806.811262,
+          "tokenUsage": {
+            "input": 14056,
+            "cachedInput": 56320,
+            "output": 12944
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "low",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "code-spec-reviewer",
+        "scenarioId": "default",
+        "repetition": 2,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "low",
+          "durationMs": 55402.311545000004,
+          "tokenUsage": {
+            "input": 14044,
+            "cachedInput": 57088,
+            "output": 9564
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "low",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "code-spec-reviewer",
+        "scenarioId": "default",
+        "repetition": 3,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "low",
+          "durationMs": 124593.04545599999,
+          "tokenUsage": {
+            "input": 21769,
+            "cachedInput": 88960,
+            "output": 23708
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "low",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "commit-audit-reviewer",
+        "scenarioId": "default",
+        "repetition": 1,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "low",
+          "durationMs": 324172.703394,
+          "tokenUsage": {
+            "input": 44958,
+            "cachedInput": 661248,
+            "output": 72968
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "low",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "commit-audit-reviewer",
+        "scenarioId": "default",
+        "repetition": 2,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "low",
+          "durationMs": 285980.43850100006,
+          "tokenUsage": {
+            "input": 19935,
+            "cachedInput": 325376,
+            "output": 71488
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "low",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [
+            {
+              "category": "review-output-invalid:review-syntax:review-json-invalid:review-json-invalid:review-json-invalid",
+              "actor": "commit-audit-generation"
+            },
+            {
+              "category": "review-output-invalid:review-syntax:review-json-invalid:review-json-invalid",
+              "actor": "commit-audit-generation"
+            }
+          ],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "commit-audit-reviewer",
+        "scenarioId": "default",
+        "repetition": 3,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "low",
+          "durationMs": 379200.09443600004,
+          "tokenUsage": {
+            "input": 30724,
+            "cachedInput": 615680,
+            "output": 96129
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "low",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [
+            {
+              "category": "review-output-invalid:review-syntax:review-json-invalid",
+              "actor": "commit-audit-generation"
+            }
+          ],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "spec-readiness-reviewer",
+        "scenarioId": "runtime-migration",
+        "repetition": 1,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "low",
+          "durationMs": 326312.03853,
+          "tokenUsage": {
+            "input": 45650,
+            "cachedInput": 587776,
+            "output": 66317
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "low",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "spec-readiness-reviewer",
+        "scenarioId": "artifact-promotion",
+        "repetition": 1,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "low",
+          "durationMs": 411447.60335999995,
+          "tokenUsage": {
+            "input": 43867,
+            "cachedInput": 399744,
+            "output": 23228
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "low",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "spec-readiness-reviewer",
+        "scenarioId": "runtime-migration",
+        "repetition": 2,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "low",
+          "durationMs": 366165.67877600004,
+          "tokenUsage": {
+            "input": 38317,
+            "cachedInput": 666240,
+            "output": 41489
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "low",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "spec-readiness-reviewer",
+        "scenarioId": "artifact-promotion",
+        "repetition": 2,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "low",
+          "durationMs": 545399.9534,
+          "tokenUsage": {
+            "input": 61661,
+            "cachedInput": 1525632,
+            "output": 107303
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "low",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "spec-readiness-reviewer",
+        "scenarioId": "runtime-migration",
+        "repetition": 3,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "low",
+          "durationMs": 210413.674573,
+          "tokenUsage": {
+            "input": 46216,
+            "cachedInput": 353152,
+            "output": 42271
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "low",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "spec-readiness-reviewer",
+        "scenarioId": "artifact-promotion",
+        "repetition": 3,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "low",
+          "durationMs": 354884.934276,
+          "tokenUsage": {
+            "input": 63258,
+            "cachedInput": 456064,
+            "output": 73847
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "low",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      }
+    ],
+    "roles": [
+      {
+        "reviewerId": "code-standards-reviewer",
+        "repetitions": [
+          {
+            "repetition": 1,
+            "score": 0.5108670877033092,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": []
+          },
+          {
+            "repetition": 2,
+            "score": 0.6712193958399298,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": []
+          },
+          {
+            "repetition": 3,
+            "score": 0.8071619353373298,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": []
+          }
+        ]
+      },
+      {
+        "reviewerId": "code-spec-reviewer",
+        "repetitions": [
+          {
+            "repetition": 1,
+            "score": 0.8557218625894323,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": []
+          },
+          {
+            "repetition": 2,
+            "score": 0.8057330924271262,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": []
+          },
+          {
+            "repetition": 3,
+            "score": 0.8227159985876408,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": []
+          }
+        ]
+      },
+      {
+        "reviewerId": "commit-audit-reviewer",
+        "repetitions": [
+          {
+            "repetition": 1,
+            "score": 0.45627715959558157,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": []
+          },
+          {
+            "repetition": 2,
+            "score": 0.8349311898256254,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": [
+              "review-output-invalid:review-syntax:review-json-invalid:review-json-invalid:review-json-invalid",
+              "review-output-invalid:review-syntax:review-json-invalid:review-json-invalid"
+            ]
+          },
+          {
+            "repetition": 3,
+            "score": 0.682721569361418,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": [
+              "review-output-invalid:review-syntax:review-json-invalid"
+            ]
+          }
+        ]
+      },
+      {
+        "reviewerId": "spec-readiness-reviewer",
+        "repetitions": [
+          {
+            "repetition": 1,
+            "score": 0.4083960280738625,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 2,
+            "expectedInstances": 2,
+            "deliveryErrors": []
+          },
+          {
+            "repetition": 2,
+            "score": 0.44627318103369107,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 2,
+            "expectedInstances": 2,
+            "deliveryErrors": []
+          },
+          {
+            "repetition": 3,
+            "score": 0.45093733491073135,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 2,
+            "expectedInstances": 2,
+            "deliveryErrors": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "schemaVersion": 4,
+    "configuration": {
+      "model": "deepseek-flash",
+      "reasoningEffort": "high"
+    },
+    "observations": [
+      {
+        "reviewerId": "code-standards-reviewer",
+        "scenarioId": "default",
+        "repetition": 1,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "high",
+          "durationMs": 147271.38380699995,
+          "tokenUsage": {
+            "input": 29969,
+            "cachedInput": 257152,
+            "output": 27221
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "high",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "code-standards-reviewer",
+        "scenarioId": "default",
+        "repetition": 2,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "high",
+          "durationMs": 99916.69712600007,
+          "tokenUsage": {
+            "input": 25199,
+            "cachedInput": 219136,
+            "output": 18356
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "high",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "code-standards-reviewer",
+        "scenarioId": "default",
+        "repetition": 3,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "high",
+          "durationMs": 111465.14121299994,
+          "tokenUsage": {
+            "input": 26095,
+            "cachedInput": 197376,
+            "output": 21920
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "high",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "code-spec-reviewer",
+        "scenarioId": "default",
+        "repetition": 1,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "high",
+          "durationMs": 59639.24391800002,
+          "tokenUsage": {
+            "input": 13297,
+            "cachedInput": 84992,
+            "output": 12215
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "high",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "code-spec-reviewer",
+        "scenarioId": "default",
+        "repetition": 2,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "high",
+          "durationMs": 50756.69705900003,
+          "tokenUsage": {
+            "input": 13587,
+            "cachedInput": 130688,
+            "output": 10735
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "high",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "code-spec-reviewer",
+        "scenarioId": "default",
+        "repetition": 3,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "high",
+          "durationMs": 68964.90077499999,
+          "tokenUsage": {
+            "input": 13524,
+            "cachedInput": 82304,
+            "output": 14345
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "high",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "commit-audit-reviewer",
+        "scenarioId": "default",
+        "repetition": 1,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "high",
+          "durationMs": 297702.8079700002,
+          "tokenUsage": {
+            "input": 28051,
+            "cachedInput": 440832,
+            "output": 74442
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "high",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [
+            {
+              "category": "review-output-invalid:review-syntax:review-json-invalid:review-json-invalid:review-json-invalid",
+              "actor": "commit-audit-generation"
+            }
+          ],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "commit-audit-reviewer",
+        "scenarioId": "default",
+        "repetition": 2,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "high",
+          "durationMs": 418063.05978200026,
+          "tokenUsage": {
+            "input": 39544,
+            "cachedInput": 920704,
+            "output": 99926
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "high",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [
+            {
+              "category": "review-output-invalid:review-syntax:review-json-invalid:review-json-invalid:review-json-invalid",
+              "actor": "commit-audit-generation"
+            },
+            {
+              "category": "review-output-invalid:review-syntax:review-json-invalid:review-json-invalid",
+              "actor": "commit-audit-generation"
+            }
+          ],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "commit-audit-reviewer",
+        "scenarioId": "default",
+        "repetition": 3,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "high",
+          "durationMs": 440703.7764399999,
+          "tokenUsage": {
+            "input": 33130,
+            "cachedInput": 487424,
+            "output": 107629
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "high",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "spec-readiness-reviewer",
+        "scenarioId": "runtime-migration",
+        "repetition": 1,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "high",
+          "durationMs": 199229.5799769999,
+          "tokenUsage": {
+            "input": 45448,
+            "cachedInput": 302208,
+            "output": 38916
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "high",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "spec-readiness-reviewer",
+        "scenarioId": "artifact-promotion",
+        "repetition": 1,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "high",
+          "durationMs": 576792.898606,
+          "tokenUsage": {
+            "input": 66682,
+            "cachedInput": 1370624,
+            "output": 105940
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "high",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "spec-readiness-reviewer",
+        "scenarioId": "runtime-migration",
+        "repetition": 2,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "high",
+          "durationMs": 235207.74473099993,
+          "tokenUsage": {
+            "input": 49915,
+            "cachedInput": 658048,
+            "output": 44931
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "high",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "spec-readiness-reviewer",
+        "scenarioId": "artifact-promotion",
+        "repetition": 2,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "high",
+          "durationMs": 521858.29169399966,
+          "tokenUsage": {
+            "input": 58546,
+            "cachedInput": 834304,
+            "output": 101934
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "high",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "spec-readiness-reviewer",
+        "scenarioId": "runtime-migration",
+        "repetition": 3,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "high",
+          "durationMs": 228661.09134200006,
+          "tokenUsage": {
+            "input": 41688,
+            "cachedInput": 551040,
+            "output": 45476
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "high",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "spec-readiness-reviewer",
+        "scenarioId": "artifact-promotion",
+        "repetition": 3,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "high",
+          "durationMs": 523777.6224689998,
+          "tokenUsage": {
+            "input": 103863,
+            "cachedInput": 597888,
+            "output": 40391
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "high",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      }
+    ],
+    "roles": [
+      {
+        "reviewerId": "code-standards-reviewer",
+        "repetitions": [
+          {
+            "repetition": 1,
+            "score": 0.6340978629028046,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": []
+          },
+          {
+            "repetition": 2,
+            "score": 0.5696817959446829,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": []
+          },
+          {
+            "repetition": 3,
+            "score": 0.6847007188444902,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": []
+          }
+        ]
+      },
+      {
+        "reviewerId": "code-spec-reviewer",
+        "repetitions": [
+          {
+            "repetition": 1,
+            "score": 0.8037757161265361,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": []
+          },
+          {
+            "repetition": 2,
+            "score": 0.7846101089645587,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": []
+          },
+          {
+            "repetition": 3,
+            "score": 0.8440322862715113,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": []
+          }
+        ]
+      },
+      {
+        "reviewerId": "commit-audit-reviewer",
+        "repetitions": [
+          {
+            "repetition": 1,
+            "score": 0.80754681364942,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": [
+              "review-output-invalid:review-syntax:review-json-invalid:review-json-invalid:review-json-invalid"
+            ]
+          },
+          {
+            "repetition": 2,
+            "score": 0.8130966894138194,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": [
+              "review-output-invalid:review-syntax:review-json-invalid:review-json-invalid:review-json-invalid",
+              "review-output-invalid:review-syntax:review-json-invalid:review-json-invalid"
+            ]
+          },
+          {
+            "repetition": 3,
+            "score": 0.7134041315633864,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": []
+          }
+        ]
+      },
+      {
+        "reviewerId": "spec-readiness-reviewer",
+        "repetitions": [
+          {
+            "repetition": 1,
+            "score": 0.4386172275194147,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 2,
+            "expectedInstances": 2,
+            "deliveryErrors": []
+          },
+          {
+            "repetition": 2,
+            "score": 0.5115712733188917,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 2,
+            "expectedInstances": 2,
+            "deliveryErrors": []
+          },
+          {
+            "repetition": 3,
+            "score": 0.4006462252914084,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 2,
+            "expectedInstances": 2,
+            "deliveryErrors": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "schemaVersion": 4,
+    "configuration": {
+      "model": "deepseek-flash",
+      "reasoningEffort": "max"
+    },
+    "observations": [
+      {
+        "reviewerId": "code-standards-reviewer",
+        "scenarioId": "default",
+        "repetition": 1,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "max",
+          "durationMs": 218240.27682100004,
+          "tokenUsage": {
+            "input": 36473,
+            "cachedInput": 250752,
+            "output": 44196
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "max",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "code-standards-reviewer",
+        "scenarioId": "default",
+        "repetition": 2,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "max",
+          "durationMs": 229181.32381200022,
+          "tokenUsage": {
+            "input": 31098,
+            "cachedInput": 308224,
+            "output": 47804
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "max",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "code-standards-reviewer",
+        "scenarioId": "default",
+        "repetition": 3,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "max",
+          "durationMs": 250833.9010079999,
+          "tokenUsage": {
+            "input": 30195,
+            "cachedInput": 322816,
+            "output": 48043
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "max",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "code-spec-reviewer",
+        "scenarioId": "default",
+        "repetition": 1,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "max",
+          "durationMs": 185426.58583600004,
+          "tokenUsage": {
+            "input": 23285,
+            "cachedInput": 256512,
+            "output": 40101
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "max",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "code-spec-reviewer",
+        "scenarioId": "default",
+        "repetition": 2,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "max",
+          "durationMs": 119291.241805,
+          "tokenUsage": {
+            "input": 15137,
+            "cachedInput": 77568,
+            "output": 26217
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "max",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "code-spec-reviewer",
+        "scenarioId": "default",
+        "repetition": 3,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "max",
+          "durationMs": 148374.788997,
+          "tokenUsage": {
+            "input": 19926,
+            "cachedInput": 168448,
+            "output": 30582
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "max",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "commit-audit-reviewer",
+        "scenarioId": "default",
+        "repetition": 1,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "max",
+          "durationMs": 689848.008285,
+          "tokenUsage": {
+            "input": 58881,
+            "cachedInput": 2161536,
+            "output": 132168
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "max",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "commit-audit-reviewer",
+        "scenarioId": "default",
+        "repetition": 2,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "max",
+          "durationMs": 1006432.781018,
+          "tokenUsage": {
+            "input": 40749,
+            "cachedInput": 2653056,
+            "output": 235776
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "max",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [
+            {
+              "category": "review-output-invalid:review-syntax:review-json-invalid",
+              "actor": "commit-audit-generation"
+            }
+          ],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "commit-audit-reviewer",
+        "scenarioId": "default",
+        "repetition": 3,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "max",
+          "durationMs": 545776.295745,
+          "tokenUsage": {
+            "input": 32038,
+            "cachedInput": 1967488,
+            "output": 89836
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "max",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "spec-readiness-reviewer",
+        "scenarioId": "runtime-migration",
+        "repetition": 1,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "max",
+          "durationMs": 643939.59573,
+          "tokenUsage": {
+            "input": 45930,
+            "cachedInput": 341760,
+            "output": 133464
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "max",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "spec-readiness-reviewer",
+        "scenarioId": "artifact-promotion",
+        "repetition": 1,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "max",
+          "durationMs": 748788.9060999999,
+          "tokenUsage": {
+            "input": 57578,
+            "cachedInput": 1162240,
+            "output": 121671
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "max",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "spec-readiness-reviewer",
+        "scenarioId": "runtime-migration",
+        "repetition": 2,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "max",
+          "durationMs": 614056.003887,
+          "tokenUsage": {
+            "input": 54991,
+            "cachedInput": 1124480,
+            "output": 111787
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "max",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "spec-readiness-reviewer",
+        "scenarioId": "artifact-promotion",
+        "repetition": 2,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "max",
+          "durationMs": 505727.71860500006,
+          "tokenUsage": {
+            "input": 44948,
+            "cachedInput": 477952,
+            "output": 90111
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "max",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "spec-readiness-reviewer",
+        "scenarioId": "runtime-migration",
+        "repetition": 3,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "max",
+          "durationMs": 348130.07464799995,
+          "tokenUsage": {
+            "input": 46532,
+            "cachedInput": 644736,
+            "output": 62999
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "max",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      },
+      {
+        "reviewerId": "spec-readiness-reviewer",
+        "scenarioId": "artifact-promotion",
+        "repetition": 3,
+        "runtime": {
+          "actualModel": "deepseek-flash",
+          "actualReasoningEffort": "max",
+          "durationMs": 1162244.906587,
+          "tokenUsage": {
+            "input": 49831,
+            "cachedInput": 1191680,
+            "output": 155524
+          },
+          "conditions": {
+            "apiModel": "deepseek-flash",
+            "forwardedReasoningEffort": "max",
+            "thinkingEnabled": true
+          }
+        },
+        "delivery": {
+          "mode": "deepseek-bound-report",
+          "errors": [],
+          "mainAgentCorrectedScoringCopy": false
+        },
+        "completed": true
+      }
+    ],
+    "roles": [
+      {
+        "reviewerId": "code-standards-reviewer",
+        "repetitions": [
+          {
+            "repetition": 1,
+            "score": 0.7547743699886117,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": []
+          },
+          {
+            "repetition": 2,
+            "score": 0.6669164378843891,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": []
+          },
+          {
+            "repetition": 3,
+            "score": 0.8258883212856023,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": []
+          }
+        ]
+      },
+      {
+        "reviewerId": "code-spec-reviewer",
+        "repetitions": [
+          {
+            "repetition": 1,
+            "score": 0.9562254309814026,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": []
+          },
+          {
+            "repetition": 2,
+            "score": 0.7783242738047327,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": []
+          },
+          {
+            "repetition": 3,
+            "score": 0.9584841078270206,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": []
+          }
+        ]
+      },
+      {
+        "reviewerId": "commit-audit-reviewer",
+        "repetitions": [
+          {
+            "repetition": 1,
+            "score": 0.8763963325307738,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": []
+          },
+          {
+            "repetition": 2,
+            "score": 0.7399244072386083,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": [
+              "review-output-invalid:review-syntax:review-json-invalid"
+            ]
+          },
+          {
+            "repetition": 3,
+            "score": 0.8066249120962772,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 1,
+            "expectedInstances": 1,
+            "deliveryErrors": []
+          }
+        ]
+      },
+      {
+        "reviewerId": "spec-readiness-reviewer",
+        "repetitions": [
+          {
+            "repetition": 1,
+            "score": 0.4747546573344865,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 2,
+            "expectedInstances": 2,
+            "deliveryErrors": []
+          },
+          {
+            "repetition": 2,
+            "score": 0.3921481462664956,
+            "scoreSource": "formal",
+            "diagnosticReason": null,
+            "mainAgentCorrectedScoringCopy": false,
+            "completedInstances": 2,
+            "expectedInstances": 2,
+            "deliveryErrors": []
+          },
+          {
+            "repetition": 3,
+            "score": 0.5470483704304107,
             "scoreSource": "formal",
             "diagnosticReason": null,
             "mainAgentCorrectedScoringCopy": false,

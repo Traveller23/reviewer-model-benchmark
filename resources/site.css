@@ -140,6 +140,14 @@ h1 {
   font-size: 17px;
   line-height: 1.53;
 }
+.version-note {
+  margin-top: 20px;
+  padding: 10px 14px;
+  border-left: 3px solid var(--accent);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 14px;
+}
 .summary-strip {
   gap: 10px;
   margin-top: 23px;
@@ -320,9 +328,10 @@ h2 {
   color: #363631;
   box-shadow: none;
 }
-.method-section p { color: #62625d; font-size: 15px; }
+.method-section p { color: #62625d; font-size: 14px; }
 .method-section .panel > p + p { margin-top: 14px; }
-.source-links { font-size: 15px; gap: 22px; }
+.method-section .cost-note { margin-bottom: 8px; }
+.method-section .source-links { font-size: 14px; gap: 8px 22px; }
 .source-links a { display: inline-flex; align-items: center; gap: 4px; }
 .icon-external-mark { width: 10px; height: 10px; stroke-width: 2; }
 .page-footer {

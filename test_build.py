@@ -104,6 +104,17 @@ class ConfigurationRulesTests(unittest.TestCase):
         self.assertAlmostEqual(result["cost"], (500 * 2 / 1_000_000) / 4)
         self.assertEqual(result["costReviewerCount"], 4)
 
+    def test_deepseek_prices_cached_and_uncached_input_separately(self):
+        item = self.fixture()
+        item["configuration"] = {"model": "deepseek-flash", "reasoningEffort": "max"}
+        for observation in item["observations"]:
+            observation["runtime"]["tokenUsage"] = {
+                "input": 1_000_000, "cachedInput": 1_000_000, "output": 1_000_000}
+        _, complete = extract([item])
+        self.assertAlmostEqual(complete[0]["cost"], 1.1295)
+        self.assertEqual(complete[0]["label"], "DeepSeek V4.1 Flash / max")
+        self.assertEqual(complete[0]["costReviewerCount"], 4)
+
     def test_missing_tokens_in_positive_repetition_uses_other_repetition(self):
         item = self.fixture()
         item["observations"][0]["runtime"]["tokenUsage"] = None

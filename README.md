@@ -4,7 +4,13 @@
 
 [Open the published benchmark page](https://cybersoul.net/reviewer-model-benchmark/)
 
-This repository builds a static benchmark page from `statistics.json`. It compares five hosted GPT models and one locally served Bonsai 2 model on four AI review roles at different reasoning effort settings. The page has five bar charts, three scatter plots, and optional Pareto fronts. The results describe this specific workload, not a general model ranking or authorization for production review.
+This repository builds a static benchmark page from `statistics.json`. Scoring version **v1.1** compares five hosted GPT models, DeepSeek V4.1 Flash, and one locally served Bonsai 2 model on four AI review roles at different reasoning effort settings. The page has five bar charts, three scatter plots, and optional Pareto fronts. The results describe this specific workload, not a general model ranking or authorization for production review.
+
+## Scoring version v1.1
+
+The differences in previously measured scores come from a change in statistical treatment: 64 repetition records changed from `diagnostic` to `formal`, and 14 `mainAgentCorrectedScoringCopy` flags were cleared. This removes the 0.9 status discount from 63 positive repetitions; the remaining changed repetition is zero. Raw scores, recorded time, token usage, reviewer weights and the aggregation formula are unchanged. Of the original 28 configurations, 22 scores rise and six stay unchanged. Their simple mean moves from 65.2345 to 66.4519 points on the 0–100 scale.
+
+This version also adds [DeepSeek V4.1 Flash](https://api-docs.deepseek.com/quick_start/pricing/) (`deepseek-flash`) at `low`, `high`, and `max`. Its weighted scores are 61.5043, 64.0161, and 69.6247. The scoring version is separate from the input's schema version 4 and the price-check date.
 
 ## What was measured
 
@@ -17,13 +23,13 @@ ARW is the software project whose development workflow supplied these tasks. A *
 | Commit Audit | Audit a staged commit candidate and required checks. | 25% |
 | Spec Readiness | Check requirements before implementation for completeness and feasibility. | 35% |
 
-The first three roles each use one fixed scenario; Spec Readiness uses two. Each of the 28 model and effort configurations ran all five scenarios in three independent repetitions: 420 scenario runs and 336 role repetitions. The current snapshot has 99 role repetitions marked as diagnostic scores. The same visible fixture material and hidden scoring cases were used across models. The full fixtures, reports, and hidden cases are not included here; the snapshot can reproduce the charts but cannot replay model runs.
+The first three roles each use one fixed scenario; Spec Readiness uses two. Each of the 31 model and effort configurations ran all five scenarios in three independent repetitions: 465 scenario runs and 372 role repetitions. The current snapshot has 35 role repetitions marked as diagnostic scores. The same visible fixture material and hidden scoring cases were used across models. The full fixtures, reports, and hidden cases are not included here; the snapshot can reproduce the charts but cannot replay model runs.
 
-Five GPT models ran through isolated Codex Reviewer sessions at `low`, `medium`, `high`, `xhigh`, and `max`. Bonsai 2 ran locally at `low`, `medium`, and `xhigh` with thinking enabled in a custom read-only Windows worker. Effort labels are requested provider settings, not equal compute budgets. [Prism ML says Bonsai 2 `low` may behave close to `xhigh`](https://huggingface.co/prism-ml/Ternary-Bonsai-2-27B-gguf), so plotted labels do not prove distinct model behavior. GPT and Bonsai 2 also had different execution environments and scheduling.
+Five GPT models ran through isolated Codex Reviewer sessions at `low`, `medium`, `high`, `xhigh`, and `max`. DeepSeek V4.1 Flash ran through its hosted API at `low`, `high`, and `max` with thinking enabled. Bonsai 2 ran locally at `low`, `medium`, and `xhigh` with thinking enabled in a custom read-only Windows worker. Effort labels are requested provider settings, not equal compute budgets. [Prism ML says Bonsai 2 `low` may behave close to `xhigh`](https://huggingface.co/prism-ml/Ternary-Bonsai-2-27B-gguf), so plotted labels do not prove distinct model behavior. The models also had different execution environments and scheduling.
 
 ## Wall-clock collection time
 
-For the **formal model collection**, the first retained call's start and last retained call's completion give these elapsed windows (Japan time, UTC+09:00):
+For the **original GPT and Bonsai 2 collection**, the first retained call's start and last retained call's completion give these elapsed windows (Japan time, UTC+09:00). This table and the clean-repeat estimate below cover those original groups; DeepSeek's additional 45 calls are excluded:
 
 | Group | Start | End | Wall-clock span |
 | --- | --- | --- | ---: |
@@ -70,6 +76,7 @@ These settings document the recorded deployment, not a performance guarantee. A 
 | Path | Purpose |
 | --- | --- |
 | `statistics.json` | Independent schema-v4 snapshot of per-scenario runtime observations and per-repetition scores. |
+| `pricing.json` | Dated official pricing rules and the reference rates used to reproduce equivalent costs. |
 | `build.py` | Computes chart metrics and generates HTML. |
 | `charts.html` | Generated local page; excluded from Git. |
 | `.env.example` | Template for the maintainer's local, ignored `.env` file. |
@@ -123,7 +130,23 @@ Weighted score = 100 × (
 
 Elapsed time and token usage use only positive-score repetitions. A role's recorded values are averaged over its usable repetitions. For Spec Readiness, only the normal `artifact-promotion` scenario supplies chart runtime metrics; the early-return `runtime-migration` scenario remains part of scoring. Configuration-level time and token values are arithmetic means over roles with available data. Missing time and incomplete three-part token records are excluded separately; zero token counts are valid. Missing role metrics omit only the affected bars and roles from that metric's configuration mean.
 
-The three token parts are uncached input, cached input, and output. Estimated *equivalent API cost* prices each role's average token use at the static per-million-token rates in `build.py`, then averages available role costs. GPT uses published OpenAI Standard short-context rates. Local Bonsai 2 uses the Alibaba Cloud Beijing `qwen3.8-27b` rate as a comparison proxy. **Bonsai 2 incurred no such API charge.** The estimate is not a bill and excludes local hardware, electricity, cache writes, long-context, and tool charges. Prices were checked on 2026-09-25; refresh them before current cost decisions.
+The three token parts are uncached input, cached input, and output. Estimated *equivalent API cost* prices each role's average token use at the reference rates in `pricing.json`, then averages available role costs. Prices were checked on **2026-09-29**; the six previously plotted models' reference rates are unchanged after verification.
+
+| Model | Reference profile | Uncached input | Cached input | Output |
+| --- | --- | ---: | ---: | ---: |
+| gpt-6-astra | Standard, short context | $10 | $1 | $50 |
+| gpt-6-sol | Standard, short context | $2 | $0.2 | $10 |
+| gpt-5.6-sol | Standard, short context | $4 | $0.4 | $20 |
+| gpt-6-luna | Standard, short context | $0.1 | $0.01 | $0.5 |
+| gpt-5.6-luna | Standard, short context | $0.2 | $0.02 | $1.2 |
+| DeepSeek V4.1 Flash | Peak/off-peak arithmetic mean, 50% each | $0.225 | $0.0045 | $0.9 |
+| Bonsai 2 | Beijing, implicit-cache comparison proxy | $0.424 | $0.085 | $1.696 |
+
+All rates are USD per million tokens. [OpenAI](https://developers.openai.com/api/docs/pricing) charges long-context rates for a single request exceeding 272,000 input tokens: input/cache rates double and output rates increase by 50% for the full request. Cache writes cost 1.25 times uncached input. GPT-6 Batch/Flex prices are half Standard; Fast is twice Standard. [GPT-5.6 Sol's current promotion](https://developers.openai.com/api/docs/models/gpt-5.6-sol) is available at least through November 21, 2026; [GPT-5.6 Luna's model page](https://developers.openai.com/api/docs/models/gpt-5.6-luna) supplies its rates.
+
+[DeepSeek](https://api-docs.deepseek.com/quick_start/pricing/) peak input/cached-input/output rates are $0.3/$0.006/$1.2; off-peak rates are half peak. This benchmark uses their arithmetic mean, assuming a 50% share of each. Peak is Monday–Friday 01:00–04:00 and 06:00–10:00 UTC, excluding Chinese public holidays; all other times are off-peak. [Qwen Beijing](https://www.alibabacloud.com/help/en/model-studio/qwen3-8-27b) explicit cache creation/read rates are $0.53/$0.042; this benchmark uses implicit caching. `pricing.json` also records the long-context rates, DeepSeek peak/off-peak rates and Qwen Singapore rates.
+
+The snapshot contains per-review token totals rather than per-request context lengths, cache-write counts or billing timestamps. Those totals cannot identify long-context requests or a peak/off-peak mix, so the charts use the stated reference profiles. The estimate is not a bill and excludes cache writes, tools, regional processing premiums, local hardware and electricity. **Bonsai 2 incurred no corresponding cloud API charge.** Update `pricing.json` and its check date before regenerating charts after a price change.
 
 Scatter plots compare equivalent cost with score, time with score, and time with equivalent cost. Each optional Pareto front uses only the visible configurations with complete values on that plot. Cost axes can use linear or logarithmic scales. Token detail is a stacked bar of the three token parts.
 
