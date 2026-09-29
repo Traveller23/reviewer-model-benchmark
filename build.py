@@ -372,7 +372,7 @@ def chart(complete, xkey, ykey, chart_id):
              tickfont={"family": CHART_DATA_FONT, "size": 11})
     for key, axis in ((xkey, figure.update_xaxes), (ykey, figure.update_yaxes)):
         if key == "cost":
-            axis(tickprefix="$", showtickprefix="all", tickformat=".3~g")
+            axis(type="log", dtick="D1", tickprefix="$", showtickprefix="all", tickformat=".3~g")
         elif key == "minutes":
             axis(ticksuffix=" min", showticksuffix="all", tickformat=".0f")
     # Plotly draws later traces on top. Keep the Pareto line after model traces.
@@ -736,7 +736,7 @@ def detail_bar_chart(grouped, metric):
     if metric == "tokens":
         figure.update_yaxes(tickformat="~s")
     elif metric == "cost":
-        figure.update_yaxes(tickprefix="$", showtickprefix="all", tickformat=".3~g")
+        figure.update_yaxes(type="linear", tickprefix="$", showtickprefix="all", tickformat=".3~g")
     else:
         figure.update_yaxes(ticksuffix=" min", showticksuffix="all", tickformat=".0f")
     chart_id = f"benchmark-bars-{metric}"
@@ -892,14 +892,14 @@ def missing_detail_note(grouped, metric, language):
             f"{reason} 该模型与推理强度组合的 token 与费用取有数据的 Reviewer 的平均值.")
 
 
-def cost_scale_control(plot_id, axis):
+def cost_scale_control(plot_id, axis, default_scale="log"):
     return (f'<div class="cost-scale-control" role="group" data-plot="{plot_id}" '
             f'data-axis="{axis}" aria-label="Cost axis scale">'
             '<span data-i18n="cost_scale">Cost scale</span>'
             '<button type="button" data-scale="linear" data-i18n="scale_linear" '
-            'aria-pressed="true">Linear</button>'
+            f'aria-pressed="{str(default_scale == "linear").lower()}">Linear</button>'
             '<button type="button" data-scale="log" data-i18n="scale_log" '
-            'aria-pressed="false">Log</button></div>')
+            f'aria-pressed="{str(default_scale == "log").lower()}">Log</button></div>')
 
 
 def page_copy():
@@ -931,13 +931,13 @@ def page_copy():
             "trade_intro": "Each dot represents one model and reasoning effort configuration. Connecting lines follow effort levels within the same model. A Pareto-front point has no other visible point that is at least as good on both plotted measures and better on one. Click Pareto Front in a legend to show those points and their connecting line. Hold Ctrl while scrolling over a chart to zoom.",
             "cost_score_title": "Equivalent API cost vs. score",
             "cost_score_desc": "Equivalent API cost converts the tokens used for the same workload to USD at published API rates. Locally run models use the corresponding cloud API rate for comparison; this is not actual billing.",
-            "cost_score_read": "Higher score is better; farther left is a lower price-based equivalent cost, not a smaller actual bill. Lines follow each model's effort settings.",
+            "cost_score_read": "Higher score is better; farther left is a lower price-based equivalent cost, not a smaller actual bill. Lines follow each model's effort settings. Use Linear / Log above the chart to switch the cost axis: Linear shows absolute differences; Log helps compare costs across a wide range.",
             "time_score_title": "Execution time vs. score",
             "time_score_desc": "Compare weighted score with the average duration of a review run for each configuration.",
             "time_score_read": "Higher score is better; farther left is a shorter average review run. Time uses positive-score repetitions; it is not the whole benchmark's wall-clock duration.",
             "time_cost_title": "Execution time vs. equivalent API cost",
             "time_cost_desc": "Inspect the relationship between elapsed time and estimated token cost.",
-            "time_cost_read": "Farther left is a shorter average review run; lower is a smaller price-based equivalent cost. This plot does not encode quality, so use it alongside the score charts.",
+            "time_cost_read": "Farther left is a shorter average review run; lower is a smaller price-based equivalent cost. This plot does not encode quality, so use it alongside the score charts. Use Linear / Log above the chart to switch the cost axis: Linear shows absolute differences; Log helps compare costs across a wide range.",
             "cost_scale": "Cost scale", "scale_linear": "Linear", "scale_log": "Log",
             "review_kicker": "03 / BENCHMARK DETAIL", "review_title": "Score by reviewer benchmark",
             "review_desc": "For each model and effort configuration, compare the four reviewers' scores, time, token usage and equivalent API cost.",
@@ -947,7 +947,7 @@ def page_copy():
             "detail_cost_title": "Equivalent API cost by reviewer",
             "detail_time_read": "Each bar is one reviewer's average time across positive-score repetitions with a recorded time. Where a repetition has two scenarios, only the normal review scenario counts.",
             "detail_token_read": "Each bar averages positive-score repetitions with all three token counts, stacking non-cached input at the bottom, cached input in the middle and output on top. Only the normal review scenario counts. Hover for exact counts.",
-            "detail_cost_read": "Each bar prices one reviewer's average token usage from complete positive-score repetitions. This is not actual billing. The cost for that model and effort is the arithmetic mean of available reviewer costs.",
+            "detail_cost_read": "Each bar prices one reviewer's average token usage from complete positive-score repetitions. This is not actual billing. The cost for that model and effort is the arithmetic mean of available reviewer costs. Use Linear / Log above the chart to switch the cost axis: Linear shows absolute differences; Log helps compare costs across a wide range.",
             "reviewer_guide_title": "The four Reviewer tasks and their score shares",
             "reviewer_guide_note": "Difficulty describes the task design, not a measured property of a model.",
             "difficulty_label": "Difficulty", "score_share_label": "Score share",
@@ -994,13 +994,13 @@ def page_copy():
             "trade_intro": "每个点代表一个模型与推理强度组合, 连线连接同一模型的不同推理强度. 对前沿上的点, 其他可见点无法在两项指标上都不差、且至少一项更好. 点击图例中的帕累托前沿, 即可显示这些点及其连线. 按住 Ctrl 并在图表上滚动滚轮可缩放.",
             "cost_score_title": "等效 API 费用与分数",
             "cost_score_desc": "等效 API 费用是把完成同一组任务消耗的 token, 按公开 API 单价换算成美元; 本地运行的模型也按对应云端 API 价格计算, 便于比较. 这不是实际账单.",
-            "cost_score_read": "分数越高越好; 越靠左表示按单价换算的等效费用越低, 不是实际账单越少. 连线连接同一模型的不同推理强度.",
+            "cost_score_read": "分数越高越好; 越靠左表示按单价换算的等效费用越低, 不是实际账单越少. 连线连接同一模型的不同推理强度. 可用图表上方的线性 / 对数切换费用坐标: 线性便于比较绝对费用差异, 对数便于查看跨数量级的费用.",
             "time_score_title": "耗时与分数",
             "time_score_desc": "比较各模型配置的综合分数与单次审查运行的平均耗时.",
             "time_score_read": "分数越高越好; 越靠左表示单次审查运行的平均耗时越短. 耗时仅统计正分重复, 不表示整个 Benchmark 的墙钟耗时.",
             "time_cost_title": "耗时与等效 API 费用",
             "time_cost_desc": "查看运行耗时与估算 token 费用之间的关系.",
-            "time_cost_read": "越靠左表示单次审查运行的平均耗时越短; 越靠下表示按单价换算的等效费用越低. 此图不表示质量, 需结合分数图阅读.",
+            "time_cost_read": "越靠左表示单次审查运行的平均耗时越短; 越靠下表示按单价换算的等效费用越低. 此图不表示质量, 需结合分数图阅读. 可用图表上方的线性 / 对数切换费用坐标: 线性便于比较绝对费用差异, 对数便于查看跨数量级的费用.",
             "cost_scale": "费用坐标", "scale_linear": "线性", "scale_log": "对数",
             "review_kicker": "03 / 基准明细", "review_title": "按 Reviewer 基准项比较分数",
             "review_desc": "对每种模型及推理强度配置, 分别比较四项 Reviewer 的分数, 耗时, token 用量与等效 API 费用.",
@@ -1010,7 +1010,7 @@ def page_copy():
             "detail_cost_title": "各 Reviewer 的等效 API 费用",
             "detail_time_read": "每根柱子是该 Reviewer 有耗时记录的正分重复的平均耗时. 一次重复若有两个场景, 只统计正常审查场景.",
             "detail_token_read": "每根柱子只对三类 token 都有记录的正分重复求平均, 从下到上依次叠加未缓存输入, 缓存输入和输出 token. 只统计正常审查场景. 悬停可查看准确数量.",
-            "detail_cost_read": "每根柱子按公开单价换算该 Reviewer 记录完整的正分重复的平均 token 用量, 不是实际账单. 该模型与推理强度组合的等效费用是有数据的 Reviewer 费用的算术平均值.",
+            "detail_cost_read": "每根柱子按公开单价换算该 Reviewer 记录完整的正分重复的平均 token 用量, 不是实际账单. 该模型与推理强度组合的等效费用是有数据的 Reviewer 费用的算术平均值. 可用图表上方的线性 / 对数切换费用坐标: 线性便于比较绝对费用差异, 对数便于查看跨数量级的费用.",
             "reviewer_guide_title": "四项 Reviewer 任务及评分占比",
             "reviewer_guide_note": "难度描述任务设计, 不是测得的模型属性.",
             "difficulty_label": "难度", "score_share_label": "评分占比",
@@ -1083,7 +1083,7 @@ def page(items):
                 "cost": "detail_cost_read"}[metric]
         note_key = "missing_time_note" if metric == "minutes" else "missing_token_note"
         note = phrase(note_key, "p", "metric-missing-note") if en[note_key] else ""
-        scale_html = cost_scale_control("benchmark-bars-cost", "y") if metric == "cost" else ""
+        scale_html = cost_scale_control("benchmark-bars-cost", "y", default_scale="linear") if metric == "cost" else ""
         detail_panels.append(
             f'<article class="panel" id="review-{metric}">'
             f'<div class="chart-panel-heading">{phrase(title, "h3")}{scale_html}</div>'
@@ -1192,6 +1192,13 @@ function fitLogTickLabels(chart, axis, root = chart) {{
   for (const label of labels) label.style.removeProperty('visibility');
   if (chart._fullLayout[axis].type !== 'log') return;
   const horizontal = axis === 'xaxis';
+  // Plotly offsets log labels starting with 0 or 1; keep one baseline or right edge.
+  const coordinate = horizontal ? 'y' : 'x';
+  const positions = labels.map(label => Number(label.getAttribute(coordinate))).filter(Number.isFinite);
+  if (positions.length) {{
+    const aligned = horizontal ? Math.max(...positions) : Math.min(...positions);
+    for (const label of labels) label.setAttribute(coordinate, String(aligned));
+  }}
   const gap = horizontal ? 8 : 4;
   // Fit labels to their rendered size while keeping Plotly's grid and tick positions.
   const candidates = labels.map(label => {{
@@ -1216,10 +1223,13 @@ for (const control of document.querySelectorAll('.cost-scale-control')) {{
   const chart = document.getElementById(control.dataset.plot);
   chart.on('plotly_afterplot', () => fitLogTickLabels(chart, axis));
   fitLogTickLabels(chart, axis);
+  const overlay = chart.closest('.bar-frame')?.querySelector('.bar-axis-overlay');
+  if (overlay && !overlay.hidden) fitLogTickLabels(chart, axis, overlay);
   control.addEventListener('click', event => {{
     const button = event.target.closest('button[data-scale]');
     if (!button || button.getAttribute('aria-pressed') === 'true') return;
-    Plotly.relayout(chart, {{[axis + '.type']:button.dataset.scale, [axis + '.autorange']:true}});
+    Plotly.relayout(chart, {{[axis + '.type']:button.dataset.scale,
+      [axis + '.dtick']:button.dataset.scale === 'log' ? 'D1' : null, [axis + '.autorange']:true}});
     for (const candidate of control.querySelectorAll('button[data-scale]'))
       candidate.setAttribute('aria-pressed', String(candidate === button));
   }});
